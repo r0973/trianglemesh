@@ -208,25 +208,18 @@
 /*   recommend double precision unless you want to generate a mesh for which */
 /*   you do not have enough memory.                                          */
 
-/* Error codes */
+/* #define SINGLE */
 
-#define ERR_CMD_LINE 1
-#define ERR_SPLIT_ENC_SEGS 2
-#define ERR_FIND_DIRECTION 3
-#define ERR_SEG_INTERSECTION 4
-#define ERR_SEG_INSERT 5
-
-/* Set correct size for pointer alignment calculations */
-#if defined(_M_X64) || defined(__amd64__)
-  #define ULONG_PTR unsigned long long
-#else
-  #define ULONG_PTR unsigned long
-#endif
+#ifdef SINGLE
+#define REAL float
+#else /* not SINGLE */
+#define REAL double
+#endif /* not SINGLE */
 
 /* If yours is not a Unix system, define the NO_TIMER compiler switch to     */
 /*   remove the Unix-specific timing code.                                   */
 
-//#define NO_TIMER
+/* #define NO_TIMER */
 
 /* To insert lots of self-checks for internal errors, define the SELF_CHECK  */
 /*   symbol.  This will slow down the program significantly.  It is best to  */
@@ -240,7 +233,7 @@
 /*   TRILIBRARY symbol.  Read the file triangle.h for details on how to call */
 /*   the procedure triangulate() that results.                               */
 
-//#define TRILIBRARY
+/* #define TRILIBRARY */
 
 /* It is possible to generate a smaller version of Triangle using one or     */
 /*   both of the following symbols.  Define the REDUCED symbol to eliminate  */
@@ -252,7 +245,7 @@
 /*   generating an object library (triangle.o) by defining the TRILIBRARY    */
 /*   symbol.                                                                 */
 
-#define REDUCED
+/* #define REDUCED */
 /* #define CDT_ONLY */
 
 /* On some machines, my exact arithmetic routines might be defeated by the   */
@@ -315,6 +308,12 @@
 #define DEADVERTEX -32768
 #define UNDEADVERTEX -32767
 
+/* The next line is used to outsmart some very stupid compilers.  If your    */
+/*   compiler is smarter, feel free to replace the "int" with "void".        */
+/*   Not that it matters.                                                    */
+
+#define VOID int
+
 /* Two constants for algorithms based on random sampling.  Both constants    */
 /*   have been chosen empirically to optimize their respective algorithms.   */
 
@@ -356,16 +355,6 @@
 #endif /* LINUX */
 #ifdef TRILIBRARY
 #include "triangle.h"
-#else
-#define ANSI_DECLARATORS
-
-/* Define as "float" for single precision. */
-#define REAL double
-
-/* The next line is used to outsmart some very stupid compilers.  If your    */
-/*   compiler is smarter, feel free to replace the "int" with "void".        */
-/*   Not that it matters.                                                    */
-#define VOID void
 #endif /* TRILIBRARY */
 
 /* A few forward declarations.                                               */
@@ -663,89 +652,6 @@ REAL o3derrboundA, o3derrboundB, o3derrboundC;
 
 unsigned long randomseed;                     /* Current random number seed. */
 
-/* Data structure for command line switches and file names.  This structure  */
-/*   is used (instead of global variables) to allow reentrancy.              */
-
-struct behavior {
-
-/* Switches for the triangulator.                                            */
-/*   poly: -p switch.  refine: -r switch.                                    */
-/*   quality: -q switch.                                                     */
-/*     minangle: minimum angle bound, specified after -q switch.             */
-/*     goodangle: cosine squared of minangle.                                */
-/*     offconstant: constant used to place off-center Steiner points.        */
-/*   vararea: -a switch without number.                                      */
-/*   fixedarea: -a switch with number.                                       */
-/*     maxarea: maximum area bound, specified after -a switch.               */
-/*   usertest: -u switch.                                                    */
-/*   regionattrib: -A switch.  convex: -c switch.                            */
-/*   weighted: 1 for -w switch, 2 for -W switch.  jettison: -j switch        */
-/*   firstnumber: inverse of -z switch.  All items are numbered starting     */
-/*     from `firstnumber'.                                                   */
-/*   edgesout: -e switch.  voronoi: -v switch.                               */
-/*   neighbors: -n switch.  geomview: -g switch.                             */
-/*   nobound: -B switch.  nopolywritten: -P switch.                          */
-/*   nonodewritten: -N switch.  noelewritten: -E switch.                     */
-/*   noiterationnum: -I switch.  noholes: -O switch.                         */
-/*   noexact: -X switch.                                                     */
-/*   order: element order, specified after -o switch.                        */
-/*   nobisect: count of how often -Y switch is selected.                     */
-/*   steiner: maximum number of Steiner points, specified after -S switch.   */
-/*   incremental: -i switch.  sweepline: -F switch.                          */
-/*   dwyer: inverse of -l switch.                                            */
-/*   splitseg: -s switch.                                                    */
-/*   conformdel: -D switch.  docheck: -C switch.                             */
-/*   quiet: -Q switch.  verbose: count of how often -V switch is selected.   */
-/*   usesegments: -p, -r, -q, or -c switch; determines whether segments are  */
-/*     used at all.                                                          */
-/*                                                                           */
-/* Read the instructions to find out the meaning of these switches.          */
-
-  int poly, refine, quality, vararea, fixedarea, usertest;
-  int regionattrib, convex, weighted, jettison;
-  int firstnumber;
-  int edgesout, voronoi, neighbors, geomview;
-  int nobound, nopolywritten, nonodewritten, noelewritten, noiterationnum;
-  int noholes, noexact, conformdel;
-  int incremental, sweepline, dwyer;
-  int splitseg;
-  int docheck;
-  int quiet, verbose;
-  int usesegments;
-  int order;
-  int nobisect;
-  int steiner;
-  REAL minangle, goodangle, offconstant;
-  REAL maxarea;
-#ifndef NO_ACUTE
-  REAL maxangle, maxgoodangle;
-#endif
-
-/* Variables for file names.                                                 */
-
-#ifndef TRILIBRARY
-  char innodefilename[FILENAMESIZE];
-  char inelefilename[FILENAMESIZE];
-  char inpolyfilename[FILENAMESIZE];
-  char areafilename[FILENAMESIZE];
-  char outnodefilename[FILENAMESIZE];
-  char outelefilename[FILENAMESIZE];
-  char outpolyfilename[FILENAMESIZE];
-  char edgefilename[FILENAMESIZE];
-  char vnodefilename[FILENAMESIZE];
-  char vedgefilename[FILENAMESIZE];
-  char neighborfilename[FILENAMESIZE];
-  char offfilename[FILENAMESIZE];
-#endif /* not TRILIBRARY */
-
-};                                              /* End of `struct behavior'. */
-
-#ifndef NO_ACUTE
-#include "acute.h"
-#endif
-
-/* Include functions not available in original triangle code                 */
-#include "util.h"
 
 /* Mesh data structure.  Triangle operates on only one mesh, but the mesh    */
 /*   structure is used (instead of global variables) to allow reentrancy.    */
@@ -764,10 +670,6 @@ struct mesh {
   struct memorypool badtriangles;
   struct memorypool flipstackers;
   struct memorypool splaynodes;
-
-#ifndef NO_ACUTE
-  struct acutepool acute_mem;
-#endif
 
 /* Variables that maintain the bad triangle queues.  The queues are          */
 /*   ordered from 4095 (highest priority) to 0 (lowest priority).            */
@@ -836,6 +738,81 @@ struct mesh {
   struct otri recenttri;
 
 };                                                  /* End of `struct mesh'. */
+
+
+/* Data structure for command line switches and file names.  This structure  */
+/*   is used (instead of global variables) to allow reentrancy.              */
+
+struct behavior {
+
+/* Switches for the triangulator.                                            */
+/*   poly: -p switch.  refine: -r switch.                                    */
+/*   quality: -q switch.                                                     */
+/*     minangle: minimum angle bound, specified after -q switch.             */
+/*     goodangle: cosine squared of minangle.                                */
+/*     offconstant: constant used to place off-center Steiner points.        */
+/*   vararea: -a switch without number.                                      */
+/*   fixedarea: -a switch with number.                                       */
+/*     maxarea: maximum area bound, specified after -a switch.               */
+/*   usertest: -u switch.                                                    */
+/*   regionattrib: -A switch.  convex: -c switch.                            */
+/*   weighted: 1 for -w switch, 2 for -W switch.  jettison: -j switch        */
+/*   firstnumber: inverse of -z switch.  All items are numbered starting     */
+/*     from `firstnumber'.                                                   */
+/*   edgesout: -e switch.  voronoi: -v switch.                               */
+/*   neighbors: -n switch.  geomview: -g switch.                             */
+/*   nobound: -B switch.  nopolywritten: -P switch.                          */
+/*   nonodewritten: -N switch.  noelewritten: -E switch.                     */
+/*   noiterationnum: -I switch.  noholes: -O switch.                         */
+/*   noexact: -X switch.                                                     */
+/*   order: element order, specified after -o switch.                        */
+/*   nobisect: count of how often -Y switch is selected.                     */
+/*   steiner: maximum number of Steiner points, specified after -S switch.   */
+/*   incremental: -i switch.  sweepline: -F switch.                          */
+/*   dwyer: inverse of -l switch.                                            */
+/*   splitseg: -s switch.                                                    */
+/*   conformdel: -D switch.  docheck: -C switch.                             */
+/*   quiet: -Q switch.  verbose: count of how often -V switch is selected.   */
+/*   usesegments: -p, -r, -q, or -c switch; determines whether segments are  */
+/*     used at all.                                                          */
+/*                                                                           */
+/* Read the instructions to find out the meaning of these switches.          */
+
+  int poly, refine, quality, vararea, fixedarea, usertest;
+  int regionattrib, convex, weighted, jettison;
+  int firstnumber;
+  int edgesout, voronoi, neighbors, geomview;
+  int nobound, nopolywritten, nonodewritten, noelewritten, noiterationnum;
+  int noholes, noexact, conformdel;
+  int incremental, sweepline, dwyer;
+  int splitseg;
+  int docheck;
+  int quiet, verbose;
+  int usesegments;
+  int order;
+  int nobisect;
+  int steiner;
+  REAL minangle, goodangle, offconstant;
+  REAL maxarea;
+
+/* Variables for file names.                                                 */
+
+#ifndef TRILIBRARY
+  char innodefilename[FILENAMESIZE];
+  char inelefilename[FILENAMESIZE];
+  char inpolyfilename[FILENAMESIZE];
+  char areafilename[FILENAMESIZE];
+  char outnodefilename[FILENAMESIZE];
+  char outelefilename[FILENAMESIZE];
+  char outpolyfilename[FILENAMESIZE];
+  char edgefilename[FILENAMESIZE];
+  char vnodefilename[FILENAMESIZE];
+  char vedgefilename[FILENAMESIZE];
+  char neighborfilename[FILENAMESIZE];
+  char offfilename[FILENAMESIZE];
+#endif /* not TRILIBRARY */
+
+};                                              /* End of `struct behavior'. */
 
 
 /*****************************************************************************/
@@ -961,16 +938,16 @@ int minus1mod3[3] = {2, 0, 1};
 /*   extracted from the two least significant bits of the pointer.           */
 
 #define decode(ptr, otri)                                                     \
-  (otri).orient = (int) ((ULONG_PTR) (ptr) & (ULONG_PTR) 3l);         \
+  (otri).orient = (int) ((unsigned long) (ptr) & (unsigned long) 3l);         \
   (otri).tri = (triangle *)                                                   \
-                  ((ULONG_PTR) (ptr) ^ (ULONG_PTR) (otri).orient)
+                  ((unsigned long) (ptr) ^ (unsigned long) (otri).orient)
 
 /* encode() compresses an oriented triangle into a single pointer.  It       */
 /*   relies on the assumption that all triangles are aligned to four-byte    */
 /*   boundaries, so the two least significant bits of (otri).tri are zero.   */
 
 #define encode(otri)                                                          \
-  (triangle) ((ULONG_PTR) (otri).tri | (ULONG_PTR) (otri).orient)
+  (triangle) ((unsigned long) (otri).tri | (unsigned long) (otri).orient)
 
 /* The following handle manipulation primitives are all described by Guibas  */
 /*   and Stolfi.  However, Guibas and Stolfi use an edge-based data          */
@@ -1134,16 +1111,16 @@ int minus1mod3[3] = {2, 0, 1};
 
 #define infect(otri)                                                          \
   (otri).tri[6] = (triangle)                                                  \
-                    ((ULONG_PTR) (otri).tri[6] | (ULONG_PTR) 2l)
+                    ((unsigned long) (otri).tri[6] | (unsigned long) 2l)
 
 #define uninfect(otri)                                                        \
   (otri).tri[6] = (triangle)                                                  \
-                    ((ULONG_PTR) (otri).tri[6] & ~ (ULONG_PTR) 2l)
+                    ((unsigned long) (otri).tri[6] & ~ (unsigned long) 2l)
 
 /* Test a triangle for viral infection.                                      */
 
 #define infected(otri)                                                        \
-  (((ULONG_PTR) (otri).tri[6] & (ULONG_PTR) 2l) != 0l)
+  (((unsigned long) (otri).tri[6] & (unsigned long) 2l) != 0l)
 
 /* Check or set a triangle's attributes.                                     */
 
@@ -1181,16 +1158,16 @@ int minus1mod3[3] = {2, 0, 1};
 /*   are masked out to produce the real pointer.                             */
 
 #define sdecode(sptr, osub)                                                   \
-  (osub).ssorient = (int) ((ULONG_PTR) (sptr) & (ULONG_PTR) 1l);      \
+  (osub).ssorient = (int) ((unsigned long) (sptr) & (unsigned long) 1l);      \
   (osub).ss = (subseg *)                                                      \
-              ((ULONG_PTR) (sptr) & ~ (ULONG_PTR) 3l)
+              ((unsigned long) (sptr) & ~ (unsigned long) 3l)
 
 /* sencode() compresses an oriented subsegment into a single pointer.  It    */
 /*   relies on the assumption that all subsegments are aligned to two-byte   */
 /*   boundaries, so the least significant bit of (osub).ss is zero.          */
 
 #define sencode(osub)                                                         \
-  (subseg) ((ULONG_PTR) (osub).ss | (ULONG_PTR) (osub).ssorient)
+  (subseg) ((unsigned long) (osub).ss | (unsigned long) (osub).ssorient)
 
 /* ssym() toggles the orientation of a subsegment.                           */
 
@@ -1346,12 +1323,6 @@ int minus1mod3[3] = {2, 0, 1};
 #define setvertex2tri(vx, value)                                              \
   ((triangle *) (vx))[m->vertex2triindex] = value
 
-#ifndef NO_ACUTE
-#ifndef CDT_ONLY
-#include "newSPLocation.h"
-#endif
-#endif
-
 /**                                                                         **/
 /**                                                                         **/
 /********* Mesh manipulation primitives end here                     *********/
@@ -1466,7 +1437,7 @@ int size;
 }
 
 #ifdef ANSI_DECLARATORS
-void TRIANGLE_DLL_API trifree(VOID *memptr)
+void trifree(VOID *memptr)
 #else /* not ANSI_DECLARATORS */
 void trifree(memptr)
 VOID *memptr;
@@ -3309,7 +3280,7 @@ void internalerror()
 /*****************************************************************************/
 
 #ifdef ANSI_DECLARATORS
-void parsecommandline(int argc, char **argv, struct behavior *b, int *err)
+void parsecommandline(int argc, char **argv, struct behavior *b)
 #else /* not ANSI_DECLARATORS */
 void parsecommandline(argc, argv, b)
 int argc;
@@ -3345,9 +3316,6 @@ struct behavior *b;
   b->steiner = -1;
   b->order = 1;
   b->minangle = 0.0;
-#ifndef NO_ACUTE
-  b->maxangle = 0.0;
-#endif
   b->maxarea = -1.0;
   b->quiet = b->verbose = 0;
 #ifndef TRILIBRARY
@@ -3383,25 +3351,6 @@ struct behavior *b;
             b->minangle = 20.0;
 	  }
 	}
-#ifndef NO_ACUTE
-	if (argv[i][j] == 'U') {
-		b->quality = 1;
-		if (((argv[i][j + 1] >= '0') && (argv[i][j + 1] <= '9')) ||
-			(argv[i][j + 1] == '.')) {
-			k = 0;
-			while (((argv[i][j + 1] >= '0') && (argv[i][j + 1] <= '9')) ||
-				(argv[i][j + 1] == '.')) {
-				j++;
-				workstring[k] = argv[i][j];
-				k++;
-			}
-			workstring[k] = '\0';
-			b->maxangle = (REAL) strtod(workstring, (char **) NULL);
-		} else {
-			b->maxangle = 140.0;
-		}
-	}
-#endif
         if (argv[i][j] == 'a') {
           b->quality = 1;
           if (((argv[i][j + 1] >= '0') && (argv[i][j + 1] <= '9')) ||
@@ -3417,13 +3366,8 @@ struct behavior *b;
             workstring[k] = '\0';
             b->maxarea = (REAL) strtod(workstring, (char **) NULL);
             if (b->maxarea <= 0.0) {
-#ifndef TRILIBRARY
               printf("Error:  Maximum area must be greater than zero.\n");
               triexit(1);
-#else
-              *err = ERR_CMD_LINE;
-              return;
-#endif
 	    }
 	  } else {
             b->vararea = 1;
@@ -3576,9 +3520,6 @@ struct behavior *b;
 #endif /* not TRILIBRARY */
   b->usesegments = b->poly || b->refine || b->quality || b->convex;
   b->goodangle = cos(b->minangle * PI / 180.0);
-#ifndef NO_ACUTE
-  b->maxgoodangle = cos(b->maxangle * PI / 180.0);
-#endif
   if (b->goodangle == 1.0) {
     b->offconstant = 0.0;
   } else {
@@ -3586,14 +3527,9 @@ struct behavior *b;
   }
   b->goodangle *= b->goodangle;
   if (b->refine && b->noiterationnum) {
-#ifndef TRILIBRARY
     printf(
       "Error:  You cannot use the -I switch when refining a triangulation.\n");
     triexit(1);
-#else
-    *err = ERR_CMD_LINE;
-    return;
-#endif
   }
   /* Be careful not to allocate space for element area constraints that */
   /*   will never be assigned any value (other than the default -1.0).  */
@@ -3739,27 +3675,27 @@ struct otri *t;
   struct osub printsh;
   vertex printvertex;
 
-  printf("triangle x%lx with orientation %d:\n", (ULONG_PTR) t->tri,
+  printf("triangle x%lx with orientation %d:\n", (unsigned long) t->tri,
          t->orient);
   decode(t->tri[0], printtri);
   if (printtri.tri == m->dummytri) {
     printf("    [0] = Outer space\n");
   } else {
-    printf("    [0] = x%lx  %d\n", (ULONG_PTR) printtri.tri,
+    printf("    [0] = x%lx  %d\n", (unsigned long) printtri.tri,
            printtri.orient);
   }
   decode(t->tri[1], printtri);
   if (printtri.tri == m->dummytri) {
     printf("    [1] = Outer space\n");
   } else {
-    printf("    [1] = x%lx  %d\n", (ULONG_PTR) printtri.tri,
+    printf("    [1] = x%lx  %d\n", (unsigned long) printtri.tri,
            printtri.orient);
   }
   decode(t->tri[2], printtri);
   if (printtri.tri == m->dummytri) {
     printf("    [2] = Outer space\n");
   } else {
-    printf("    [2] = x%lx  %d\n", (ULONG_PTR) printtri.tri,
+    printf("    [2] = x%lx  %d\n", (unsigned long) printtri.tri,
            printtri.orient);
   }
 
@@ -3768,37 +3704,37 @@ struct otri *t;
     printf("    Origin[%d] = NULL\n", (t->orient + 1) % 3 + 3);
   else
     printf("    Origin[%d] = x%lx  (%.12g, %.12g)\n",
-           (t->orient + 1) % 3 + 3, (ULONG_PTR) printvertex,
+           (t->orient + 1) % 3 + 3, (unsigned long) printvertex,
            printvertex[0], printvertex[1]);
   dest(*t, printvertex);
   if (printvertex == (vertex) NULL)
     printf("    Dest  [%d] = NULL\n", (t->orient + 2) % 3 + 3);
   else
     printf("    Dest  [%d] = x%lx  (%.12g, %.12g)\n",
-           (t->orient + 2) % 3 + 3, (ULONG_PTR) printvertex,
+           (t->orient + 2) % 3 + 3, (unsigned long) printvertex,
            printvertex[0], printvertex[1]);
   apex(*t, printvertex);
   if (printvertex == (vertex) NULL)
     printf("    Apex  [%d] = NULL\n", t->orient + 3);
   else
     printf("    Apex  [%d] = x%lx  (%.12g, %.12g)\n",
-           t->orient + 3, (ULONG_PTR) printvertex,
+           t->orient + 3, (unsigned long) printvertex,
            printvertex[0], printvertex[1]);
 
   if (b->usesegments) {
     sdecode(t->tri[6], printsh);
     if (printsh.ss != m->dummysub) {
-      printf("    [6] = x%lx  %d\n", (ULONG_PTR) printsh.ss,
+      printf("    [6] = x%lx  %d\n", (unsigned long) printsh.ss,
              printsh.ssorient);
     }
     sdecode(t->tri[7], printsh);
     if (printsh.ss != m->dummysub) {
-      printf("    [7] = x%lx  %d\n", (ULONG_PTR) printsh.ss,
+      printf("    [7] = x%lx  %d\n", (unsigned long) printsh.ss,
              printsh.ssorient);
     }
     sdecode(t->tri[8], printsh);
     if (printsh.ss != m->dummysub) {
-      printf("    [8] = x%lx  %d\n", (ULONG_PTR) printsh.ss,
+      printf("    [8] = x%lx  %d\n", (unsigned long) printsh.ss,
              printsh.ssorient);
     }
   }
@@ -3834,19 +3770,19 @@ struct osub *s;
   vertex printvertex;
 
   printf("subsegment x%lx with orientation %d and mark %d:\n",
-         (ULONG_PTR) s->ss, s->ssorient, mark(*s));
+         (unsigned long) s->ss, s->ssorient, mark(*s));
   sdecode(s->ss[0], printsh);
   if (printsh.ss == m->dummysub) {
     printf("    [0] = No subsegment\n");
   } else {
-    printf("    [0] = x%lx  %d\n", (ULONG_PTR) printsh.ss,
+    printf("    [0] = x%lx  %d\n", (unsigned long) printsh.ss,
            printsh.ssorient);
   }
   sdecode(s->ss[1], printsh);
   if (printsh.ss == m->dummysub) {
     printf("    [1] = No subsegment\n");
   } else {
-    printf("    [1] = x%lx  %d\n", (ULONG_PTR) printsh.ss,
+    printf("    [1] = x%lx  %d\n", (unsigned long) printsh.ss,
            printsh.ssorient);
   }
 
@@ -3855,28 +3791,28 @@ struct osub *s;
     printf("    Origin[%d] = NULL\n", 2 + s->ssorient);
   else
     printf("    Origin[%d] = x%lx  (%.12g, %.12g)\n",
-           2 + s->ssorient, (ULONG_PTR) printvertex,
+           2 + s->ssorient, (unsigned long) printvertex,
            printvertex[0], printvertex[1]);
   sdest(*s, printvertex);
   if (printvertex == (vertex) NULL)
     printf("    Dest  [%d] = NULL\n", 3 - s->ssorient);
   else
     printf("    Dest  [%d] = x%lx  (%.12g, %.12g)\n",
-           3 - s->ssorient, (ULONG_PTR) printvertex,
+           3 - s->ssorient, (unsigned long) printvertex,
            printvertex[0], printvertex[1]);
 
   decode(s->ss[6], printtri);
   if (printtri.tri == m->dummytri) {
     printf("    [6] = Outer space\n");
   } else {
-    printf("    [6] = x%lx  %d\n", (ULONG_PTR) printtri.tri,
+    printf("    [6] = x%lx  %d\n", (unsigned long) printtri.tri,
            printtri.orient);
   }
   decode(s->ss[7], printtri);
   if (printtri.tri == m->dummytri) {
     printf("    [7] = Outer space\n");
   } else {
-    printf("    [7] = x%lx  %d\n", (ULONG_PTR) printtri.tri,
+    printf("    [7] = x%lx  %d\n", (unsigned long) printtri.tri,
            printtri.orient);
   }
 
@@ -3885,14 +3821,14 @@ struct osub *s;
     printf("    Segment origin[%d] = NULL\n", 4 + s->ssorient);
   else
     printf("    Segment origin[%d] = x%lx  (%.12g, %.12g)\n",
-           4 + s->ssorient, (ULONG_PTR) printvertex,
+           4 + s->ssorient, (unsigned long) printvertex,
            printvertex[0], printvertex[1]);
   segdest(*s, printvertex);
   if (printvertex == (vertex) NULL)
     printf("    Segment dest  [%d] = NULL\n", 5 - s->ssorient);
   else
     printf("    Segment dest  [%d] = x%lx  (%.12g, %.12g)\n",
-           5 - s->ssorient, (ULONG_PTR) printvertex,
+           5 - s->ssorient, (unsigned long) printvertex,
            printvertex[0], printvertex[1]);
 }
 
@@ -3955,7 +3891,7 @@ struct memorypool *pool;
 #endif /* not ANSI_DECLARATORS */
 
 {
-  ULONG_PTR alignptr;
+  unsigned long alignptr;
 
   pool->items = 0;
   pool->maxitems = 0;
@@ -3963,11 +3899,11 @@ struct memorypool *pool;
   /* Set the currently active block. */
   pool->nowblock = pool->firstblock;
   /* Find the first item in the pool.  Increment by the size of (VOID *). */
-  alignptr = (ULONG_PTR) (pool->nowblock + 1);
+  alignptr = (unsigned long) (pool->nowblock + 1);
   /* Align the item on an `alignbytes'-byte boundary. */
   pool->nextitem = (VOID *)
-    (alignptr + (ULONG_PTR) pool->alignbytes -
-     (alignptr % (ULONG_PTR) pool->alignbytes));
+    (alignptr + (unsigned long) pool->alignbytes -
+     (alignptr % (unsigned long) pool->alignbytes));
   /* There are lots of unallocated items left in this block. */
   pool->unallocateditems = pool->itemsfirstblock;
   /* The stack of deallocated items is empty. */
@@ -4072,7 +4008,7 @@ struct memorypool *pool;
 {
   VOID *newitem;
   VOID **newblock;
-  ULONG_PTR alignptr;
+  unsigned long alignptr;
 
   /* First check the linked list of dead items.  If the list is not   */
   /*   empty, allocate an item from the list rather than a fresh one. */
@@ -4097,11 +4033,11 @@ struct memorypool *pool;
       pool->nowblock = (VOID **) *(pool->nowblock);
       /* Find the first item in the block.    */
       /*   Increment by the size of (VOID *). */
-      alignptr = (ULONG_PTR) (pool->nowblock + 1);
+      alignptr = (unsigned long) (pool->nowblock + 1);
       /* Align the item on an `alignbytes'-byte boundary. */
       pool->nextitem = (VOID *)
-        (alignptr + (ULONG_PTR) pool->alignbytes -
-         (alignptr % (ULONG_PTR) pool->alignbytes));
+        (alignptr + (unsigned long) pool->alignbytes -
+         (alignptr % (unsigned long) pool->alignbytes));
       /* There are lots of unallocated items left in this block. */
       pool->unallocateditems = pool->itemsperblock;
     }
@@ -4156,16 +4092,16 @@ struct memorypool *pool;
 #endif /* not ANSI_DECLARATORS */
 
 {
-  ULONG_PTR alignptr;
+  unsigned long alignptr;
 
   /* Begin the traversal in the first block. */
   pool->pathblock = pool->firstblock;
   /* Find the first item in the block.  Increment by the size of (VOID *). */
-  alignptr = (ULONG_PTR) (pool->pathblock + 1);
+  alignptr = (unsigned long) (pool->pathblock + 1);
   /* Align with item on an `alignbytes'-byte boundary. */
   pool->pathitem = (VOID *)
-    (alignptr + (ULONG_PTR) pool->alignbytes -
-     (alignptr % (ULONG_PTR) pool->alignbytes));
+    (alignptr + (unsigned long) pool->alignbytes -
+     (alignptr % (unsigned long) pool->alignbytes));
   /* Set the number of items left in the current block. */
   pool->pathitemsleft = pool->itemsfirstblock;
 }
@@ -4193,7 +4129,7 @@ struct memorypool *pool;
 
 {
   VOID *newitem;
-  ULONG_PTR alignptr;
+  unsigned long alignptr;
 
   /* Stop upon exhausting the list of items. */
   if (pool->pathitem == pool->nextitem) {
@@ -4205,11 +4141,11 @@ struct memorypool *pool;
     /* Find the next block. */
     pool->pathblock = (VOID **) *(pool->pathblock);
     /* Find the first item in the block.  Increment by the size of (VOID *). */
-    alignptr = (ULONG_PTR) (pool->pathblock + 1);
+    alignptr = (unsigned long) (pool->pathblock + 1);
     /* Align with item on an `alignbytes'-byte boundary. */
     pool->pathitem = (VOID *)
-      (alignptr + (ULONG_PTR) pool->alignbytes -
-       (alignptr % (ULONG_PTR) pool->alignbytes));
+      (alignptr + (unsigned long) pool->alignbytes -
+       (alignptr % (unsigned long) pool->alignbytes));
     /* Set the number of items left in the current block. */
     pool->pathitemsleft = pool->itemsperblock;
   }
@@ -4261,16 +4197,16 @@ int subsegbytes;
 #endif /* not ANSI_DECLARATORS */
 
 {
-  ULONG_PTR alignptr;
+  unsigned long alignptr;
 
   /* Set up `dummytri', the `triangle' that occupies "outer space." */
   m->dummytribase = (triangle *) trimalloc(trianglebytes +
                                            m->triangles.alignbytes);
   /* Align `dummytri' on a `triangles.alignbytes'-byte boundary. */
-  alignptr = (ULONG_PTR) m->dummytribase;
+  alignptr = (unsigned long) m->dummytribase;
   m->dummytri = (triangle *)
-    (alignptr + (ULONG_PTR) m->triangles.alignbytes -
-     (alignptr % (ULONG_PTR) m->triangles.alignbytes));
+    (alignptr + (unsigned long) m->triangles.alignbytes -
+     (alignptr % (unsigned long) m->triangles.alignbytes));
   /* Initialize the three adjoining triangles to be "outer space."  These  */
   /*   will eventually be changed by various bonding operations, but their */
   /*   values don't really matter, as long as they can legally be          */
@@ -4290,10 +4226,10 @@ int subsegbytes;
     m->dummysubbase = (subseg *) trimalloc(subsegbytes +
                                            m->subsegs.alignbytes);
     /* Align `dummysub' on a `subsegs.alignbytes'-byte boundary. */
-    alignptr = (ULONG_PTR) m->dummysubbase;
+    alignptr = (unsigned long) m->dummysubbase;
     m->dummysub = (subseg *)
-      (alignptr + (ULONG_PTR) m->subsegs.alignbytes -
-       (alignptr % (ULONG_PTR) m->subsegs.alignbytes));
+      (alignptr + (unsigned long) m->subsegs.alignbytes -
+       (alignptr % (unsigned long) m->subsegs.alignbytes));
     /* Initialize the two adjoining subsegments to be the omnipresent      */
     /*   subsegment.  These will eventually be changed by various bonding  */
     /*   operations, but their values don't really matter, as long as they */
@@ -4650,7 +4586,7 @@ int number;
 {
   VOID **getblock;
   char *foundvertex;
-  ULONG_PTR alignptr;
+  unsigned long alignptr;
   int current;
 
   getblock = m->vertices.firstblock;
@@ -4667,9 +4603,9 @@ int number;
   }
 
   /* Now find the right vertex. */
-  alignptr = (ULONG_PTR) (getblock + 1);
-  foundvertex = (char *) (alignptr + (ULONG_PTR) m->vertices.alignbytes -
-                          (alignptr % (ULONG_PTR) m->vertices.alignbytes));
+  alignptr = (unsigned long) (getblock + 1);
+  foundvertex = (char *) (alignptr + (unsigned long) m->vertices.alignbytes -
+                          (alignptr % (unsigned long) m->vertices.alignbytes));
   return (vertex) (foundvertex + m->vertices.itembytes * (number - current));
 }
 
@@ -4960,11 +4896,7 @@ void exactinit()
 #ifdef SINGLE
   _control87(_PC_24, _MCW_PC); /* Set FPU control word for single precision. */
 #else /* not SINGLE */
-#if defined(_M_X64) || defined(__amd64__)
-  _control87(_PC_64, _MCW_RC); /* Set FPU control word for double precision. */
-#else
   _control87(_PC_53, _MCW_PC); /* Set FPU control word for double precision. */
-#endif
 #endif /* not SINGLE */
 #endif /* CPU86 */
 #ifdef LINUX
@@ -5229,10 +5161,10 @@ REAL detsum;
   INEXACT REAL detleft, detright;
   REAL detlefttail, detrighttail;
   REAL det, errbound;
-  REAL B[5], C1[8], C2[12], D[16];
+  REAL B[4], C1[8], C2[12], D[16];
   INEXACT REAL B3;
   int C1length, C2length, Dlength;
-  REAL u[5];
+  REAL u[4];
   INEXACT REAL u3;
   INEXACT REAL s1, t1;
   REAL s0, t0;
@@ -5409,7 +5341,7 @@ REAL permanent;
   INEXACT REAL aa3, bb3, cc3;
   INEXACT REAL ti1, tj1;
   REAL ti0, tj0;
-  REAL u[5], v[5];
+  REAL u[4], v[4];
   INEXACT REAL u3, v3;
   REAL temp8[8], temp16a[16], temp16b[16], temp16c[16];
   REAL temp32a[32], temp32b[32], temp48[48], temp64[64];
@@ -7019,7 +6951,7 @@ struct badtriang *badtri;
     length *= multiplier;
   }
   /* `length' is approximately squareroot(2.0) to what exponent? */
-  exponent = 2 * exponent + (length > SQUAREROOTTWO);
+  exponent = 2.0 * exponent + (length > SQUAREROOTTWO);
   /* `exponent' is now in the range 0...2047 for IEEE double precision.   */
   /*   Choose a queue in the range 0...4095.  The shortest edges have the */
   /*   highest priority (queue 4095).                                     */
@@ -7298,9 +7230,6 @@ struct otri *testtri;
   REAL angle;
   REAL area;
   REAL dist1, dist2;
-#ifndef NO_ACUTE
-  REAL maxedge, maxangle;
-#endif
   subseg sptr;                      /* Temporary variable used by tspivot(). */
   triangle ptr;           /* Temporary variable used by oprev() and dnext(). */
 
@@ -7379,32 +7308,8 @@ struct otri *testtri;
     }
   }
 
-#ifndef NO_ACUTE
-	// find the maximum edge and accordingly the pqr orientation
-	if ((apexlen > orglen) && (apexlen > destlen)) {
-		/* The edge opposite the apex is longest. */
-		maxedge = apexlen;
-		/* Find the cosine of the angle at the apex. */
-		maxangle = (orglen + destlen - apexlen)/ (2*sqrt(orglen*destlen));	
-	} else if (orglen > destlen) {
-		/* The edge opposite the origin is longest. */
-		maxedge = orglen;
-		/* Find the cosine of the angle at the origin. */
-		maxangle = (apexlen + destlen - orglen)/(2*sqrt(apexlen*destlen));
-	} else {
-		/* The edge opposite the destination is longest. */
-		maxedge = destlen;
-		/* Find the cosine of the angle at the destination. */
-		maxangle = (apexlen + orglen -destlen)/(2*sqrt(apexlen*orglen));
-	}
-#endif
-
   /* Check whether the angle is smaller than permitted. */
-#ifndef NO_ACUTE
-  if ((angle > b->goodangle)  ||  (maxangle < b->maxgoodangle && b->maxangle != 0.0)) {
-#else
   if (angle > b->goodangle) {
-#endif
     /* Use the rules of Miller, Pav, and Walkington to decide that certain */
     /*   triangles should not be split, even if they have bad angles.      */
     /*   A skinny triangle is not split if its shortest edge subtends a    */
@@ -7744,7 +7649,7 @@ struct otri *searchtri;
   char *firsttri;
   struct otri sampletri;
   vertex torg, tdest;
-  ULONG_PTR alignptr;
+  unsigned long alignptr;
   REAL searchdist, dist;
   REAL ahead;
   long samplesperblock, totalsamplesleft, samplesleft;
@@ -7816,11 +7721,11 @@ struct otri *searchtri;
       population = totalpopulation;
     }
     /* Find a pointer to the first triangle in the block. */
-    alignptr = (ULONG_PTR) (sampleblock + 1);
+    alignptr = (unsigned long) (sampleblock + 1);
     firsttri = (char *) (alignptr +
-                         (ULONG_PTR) m->triangles.alignbytes -
+                         (unsigned long) m->triangles.alignbytes -
                          (alignptr %
-                          (ULONG_PTR) m->triangles.alignbytes));
+                          (unsigned long) m->triangles.alignbytes));
 
     /* Choose `samplesleft' randomly sampled triangles in this block. */
     do {
@@ -8291,11 +8196,10 @@ struct otri *flipedge;                    /* Handle for the triangle abc. */
 enum insertvertexresult insertvertex(struct mesh *m, struct behavior *b,
                                      vertex newvertex, struct otri *searchtri,
                                      struct osub *splitseg,
-                                     int segmentflaws, int triflaws,
-                                     int attribs)
+                                     int segmentflaws, int triflaws)
 #else /* not ANSI_DECLARATORS */
 enum insertvertexresult insertvertex(m, b, newvertex, searchtri, splitseg,
-                                     segmentflaws, triflaws, attribs)
+                                     segmentflaws, triflaws)
 struct mesh *m;
 struct behavior *b;
 vertex newvertex;
@@ -8303,7 +8207,6 @@ struct otri *searchtri;
 struct osub *splitseg;
 int segmentflaws;
 int triflaws;
-int attribs;
 #endif /* not ANSI_DECLARATORS */
 
 {
@@ -8433,14 +8336,6 @@ int attribs;
     setdest(newbotright, rightvertex);
     setapex(newbotright, newvertex);
     setorg(horiz, newvertex);
-	
-    /* Interpolate attributes of new vertex. */
-    if (attribs > 0 && m->nextras > 0) {
-	  /* TODO: the new vertex lies on the segment (rightvertex, leftvertex), */
-	  /*       so we should use line interpolation. */
-      interpolate(newvertex, rightvertex, leftvertex, botvertex, m->nextras);
-    }
-
     for (i = 0; i < m->eextras; i++) {
       /* Set the element attributes of a new triangle. */
       setelemattribute(newbotright, i, elemattribute(botright, i));
@@ -8586,12 +8481,6 @@ int attribs;
     org(horiz, rightvertex);
     dest(horiz, leftvertex);
     apex(horiz, botvertex);
-
-    /* Interpolate attributes of new vertex. */
-    if (attribs > 0 && m->nextras > 0) {
-      interpolate(newvertex, rightvertex, leftvertex, botvertex, m->nextras);
-    }
-
     setorg(newbotleft, leftvertex);
     setdest(newbotleft, botvertex);
     setapex(newbotleft, newvertex);
@@ -10352,7 +10241,7 @@ struct behavior *b;
   vertexloop = vertextraverse(m);
   while (vertexloop != (vertex) NULL) {
     starttri.tri = m->dummytri;
-    if (insertvertex(m, b, vertexloop, &starttri, (struct osub *) NULL, 0, 0, 0)
+    if (insertvertex(m, b, vertexloop, &starttri, (struct osub *) NULL, 0, 0)
         == DUPLICATEVERTEX) {
       if (!b->quiet) {
         printf(
@@ -11703,7 +11592,7 @@ FILE *polyfile;
 #ifdef ANSI_DECLARATORS
 enum finddirectionresult finddirection(struct mesh *m, struct behavior *b,
                                        struct otri *searchtri,
-                                       vertex searchpoint, int *err)
+                                       vertex searchpoint)
 #else /* not ANSI_DECLARATORS */
 enum finddirectionresult finddirection(m, b, searchtri, searchpoint)
 struct mesh *m;
@@ -11743,16 +11632,11 @@ vertex searchpoint;
     /* Turn left until satisfied. */
     onextself(*searchtri);
     if (searchtri->tri == m->dummytri) {
-#ifndef TRILIBRARY
       printf("Internal error in finddirection():  Unable to find a\n");
       printf("  triangle leading from (%.12g, %.12g) to", startvertex[0],
              startvertex[1]);
       printf("  (%.12g, %.12g).\n", searchpoint[0], searchpoint[1]);
       internalerror();
-#else
-      *err = ERR_FIND_DIRECTION;
-	  return WITHIN;
-#endif
     }
     apex(*searchtri, leftvertex);
     rightccw = leftccw;
@@ -11763,16 +11647,11 @@ vertex searchpoint;
     /* Turn right until satisfied. */
     oprevself(*searchtri);
     if (searchtri->tri == m->dummytri) {
-#ifndef TRILIBRARY
       printf("Internal error in finddirection():  Unable to find a\n");
       printf("  triangle leading from (%.12g, %.12g) to", startvertex[0],
              startvertex[1]);
       printf("  (%.12g, %.12g).\n", searchpoint[0], searchpoint[1]);
       internalerror();
-#else
-      *err = ERR_FIND_DIRECTION;
-	  return WITHIN;
-#endif
     }
     dest(*searchtri, rightvertex);
     leftccw = rightccw;
@@ -11808,7 +11687,7 @@ vertex searchpoint;
 #ifdef ANSI_DECLARATORS
 void segmentintersection(struct mesh *m, struct behavior *b,
                          struct otri *splittri, struct osub *splitsubseg,
-                         vertex endpoint2, int *err)
+                         vertex endpoint2)
 #else /* not ANSI_DECLARATORS */
 void segmentintersection(m, b, splittri, splitsubseg, endpoint2)
 struct mesh *m;
@@ -11847,14 +11726,9 @@ vertex endpoint2;
   ety = torg[1] - endpoint2[1];
   denom = ty * ex - tx * ey;
   if (denom == 0.0) {
-#ifndef TRILIBRARY
     printf("Internal error in segmentintersection():");
     printf("  Attempt to find intersection of parallel segments.\n");
     internalerror();
-#else
-      *err = ERR_SEG_INTERSECTION;
-	  return;
-#endif
   }
   split = (ey * etx - ex * ety) / denom;
   /* Create the new vertex. */
@@ -11871,16 +11745,11 @@ vertex endpoint2;
            torg[0], torg[1], tdest[0], tdest[1], newvertex[0], newvertex[1]);
   }
   /* Insert the intersection vertex.  This should always succeed. */
-  success = insertvertex(m, b, newvertex, splittri, splitsubseg, 0, 0, 0);
+  success = insertvertex(m, b, newvertex, splittri, splitsubseg, 0, 0);
   if (success != SUCCESSFULVERTEX) {
-#ifndef TRILIBRARY
     printf("Internal error in segmentintersection():\n");
     printf("  Failure to split a segment.\n");
     internalerror();
-#else
-      *err = ERR_SEG_INTERSECTION;
-	  return;
-#endif
   }
   /* Record a triangle whose origin is the new vertex. */
   setvertex2tri(newvertex, encode(*splittri));
@@ -11904,24 +11773,16 @@ vertex endpoint2;
 
   /* Inserting the vertex may have caused edge flips.  We wish to rediscover */
   /*   the edge connecting endpoint1 to the new intersection vertex.         */
-  collinear = finddirection(m, b, splittri, endpoint1, err);
-#ifdef TRILIBRARY
-  if (*err > 0) return;
-#endif
+  collinear = finddirection(m, b, splittri, endpoint1);
   dest(*splittri, rightvertex);
   apex(*splittri, leftvertex);
   if ((leftvertex[0] == endpoint1[0]) && (leftvertex[1] == endpoint1[1])) {
     onextself(*splittri);
   } else if ((rightvertex[0] != endpoint1[0]) ||
              (rightvertex[1] != endpoint1[1])) {
-#ifndef TRILIBRARY
     printf("Internal error in segmentintersection():\n");
     printf("  Topological inconsistency after splitting a segment.\n");
     internalerror();
-#else
-      *err = ERR_SEG_INTERSECTION;
-	  return;
-#endif
   }
   /* `splittri' should have destination endpoint1. */
 }
@@ -11952,7 +11813,7 @@ vertex endpoint2;
 
 #ifdef ANSI_DECLARATORS
 int scoutsegment(struct mesh *m, struct behavior *b, struct otri *searchtri,
-                 vertex endpoint2, int newmark, int *err)
+                 vertex endpoint2, int newmark)
 #else /* not ANSI_DECLARATORS */
 int scoutsegment(m, b, searchtri, endpoint2, newmark)
 struct mesh *m;
@@ -11969,10 +11830,7 @@ int newmark;
   enum finddirectionresult collinear;
   subseg sptr;                      /* Temporary variable used by tspivot(). */
 
-  collinear = finddirection(m, b, searchtri, endpoint2, err);
-#ifdef TRILIBRARY
-  if (*err > 0) return -1;
-#endif
+  collinear = finddirection(m, b, searchtri, endpoint2);
   dest(*searchtri, rightvertex);
   apex(*searchtri, leftvertex);
   if (((leftvertex[0] == endpoint2[0]) && (leftvertex[1] == endpoint2[1])) ||
@@ -11990,14 +11848,14 @@ int newmark;
     lprevself(*searchtri);
     insertsubseg(m, b, searchtri, newmark);
     /* Insert the remainder of the segment. */
-    return scoutsegment(m, b, searchtri, endpoint2, newmark, err);
+    return scoutsegment(m, b, searchtri, endpoint2, newmark);
   } else if (collinear == RIGHTCOLLINEAR) {
     /* We've collided with a vertex between the segment's endpoints. */
     insertsubseg(m, b, searchtri, newmark);
     /* Make the collinear vertex be the triangle's origin. */
     lnextself(*searchtri);
     /* Insert the remainder of the segment. */
-    return scoutsegment(m, b, searchtri, endpoint2, newmark, err);
+    return scoutsegment(m, b, searchtri, endpoint2, newmark);
   } else {
     lnext(*searchtri, crosstri);
     tspivot(crosstri, crosssubseg);
@@ -12006,14 +11864,11 @@ int newmark;
       return 0;
     } else {
       /* Insert a vertex at the intersection. */
-      segmentintersection(m, b, &crosstri, &crosssubseg, endpoint2, err);
-#ifdef TRILIBRARY
-      if (*err > 0) return -1;
-#endif
+      segmentintersection(m, b, &crosstri, &crosssubseg, endpoint2);
       otricopy(crosstri, *searchtri);
       insertsubseg(m, b, searchtri, newmark);
       /* Insert the remainder of the segment. */
-      return scoutsegment(m, b, searchtri, endpoint2, newmark, err);
+      return scoutsegment(m, b, searchtri, endpoint2, newmark);
     }
   }
 }
@@ -12078,7 +11933,7 @@ int newmark;
   searchtri1.tri = m->dummytri;
   /* Attempt to insert the new vertex. */
   success = insertvertex(m, b, newvertex, &searchtri1, (struct osub *) NULL,
-                         0, 0, 0);
+                         0, 0);
   if (success == DUPLICATEVERTEX) {
     if (b->verbose > 2) {
       printf("  Segment intersects existing vertex (%.12g, %.12g).\n",
@@ -12096,7 +11951,7 @@ int newmark;
       /* By fluke, we've landed right on another segment.  Split it. */
       tspivot(searchtri1, brokensubseg);
       success = insertvertex(m, b, newvertex, &searchtri1, &brokensubseg,
-                             0, 0, 0);
+                             0, 0);
       if (success != SUCCESSFULVERTEX) {
         printf("Internal error in conformingedge():\n");
         printf("  Failure to split a segment.\n");
@@ -12292,7 +12147,7 @@ int leftside;
 
 #ifdef ANSI_DECLARATORS
 void constrainededge(struct mesh *m, struct behavior *b,
-                     struct otri *starttri, vertex endpoint2, int newmark, int *err)
+                     struct otri *starttri, vertex endpoint2, int newmark)
 #else /* not ANSI_DECLARATORS */
 void constrainededge(m, b, starttri, endpoint2, newmark)
 struct mesh *m;
@@ -12368,7 +12223,7 @@ int newmark;
           /* We've collided with a segment between endpoint1 and endpoint2. */
           collision = 1;
           /* Insert a vertex at the intersection. */
-          segmentintersection(m, b, &fixuptri, &crosssubseg, endpoint2, err);
+          segmentintersection(m, b, &fixuptri, &crosssubseg, endpoint2);
           done = 1;
         }
       }
@@ -12380,8 +12235,8 @@ int newmark;
   /*   segment connecting that vertex with endpoint2.                     */
   if (collision) {
     /* Insert the remainder of the segment. */
-    if (!scoutsegment(m, b, &fixuptri, endpoint2, newmark, err)) {
-      constrainededge(m, b, &fixuptri, endpoint2, newmark, err);
+    if (!scoutsegment(m, b, &fixuptri, endpoint2, newmark)) {
+      constrainededge(m, b, &fixuptri, endpoint2, newmark);
     }
   }
 }
@@ -12394,7 +12249,7 @@ int newmark;
 
 #ifdef ANSI_DECLARATORS
 void insertsegment(struct mesh *m, struct behavior *b,
-                   vertex endpoint1, vertex endpoint2, int newmark, int *err)
+                   vertex endpoint1, vertex endpoint2, int newmark)
 #else /* not ANSI_DECLARATORS */
 void insertsegment(m, b, endpoint1, endpoint2, newmark)
 struct mesh *m;
@@ -12429,23 +12284,18 @@ int newmark;
     symself(searchtri1);
     /* Search for the segment's first endpoint by point location. */
     if (locate(m, b, endpoint1, &searchtri1) != ONVERTEX) {
-#ifndef TRILIBRARY
       printf(
         "Internal error in insertsegment():  Unable to locate PSLG vertex\n");
       printf("  (%.12g, %.12g) in triangulation.\n",
              endpoint1[0], endpoint1[1]);
       internalerror();
-#else
-      *err = ERR_SEG_INSERT;
-	  return;
-#endif
     }
   }
   /* Remember this triangle to improve subsequent point location. */
   otricopy(searchtri1, m->recenttri);
   /* Scout the beginnings of a path from the first endpoint */
   /*   toward the second.                                   */
-  if (scoutsegment(m, b, &searchtri1, endpoint2, newmark, err)) {
+  if (scoutsegment(m, b, &searchtri1, endpoint2, newmark)) {
     /* The segment was easily inserted. */
     return;
   }
@@ -12467,23 +12317,18 @@ int newmark;
     symself(searchtri2);
     /* Search for the segment's second endpoint by point location. */
     if (locate(m, b, endpoint2, &searchtri2) != ONVERTEX) {
-#ifndef TRILIBRARY
       printf(
         "Internal error in insertsegment():  Unable to locate PSLG vertex\n");
       printf("  (%.12g, %.12g) in triangulation.\n",
              endpoint2[0], endpoint2[1]);
       internalerror();
-#else
-      *err = ERR_SEG_INSERT;
-	  return;
-#endif
     }
   }
   /* Remember this triangle to improve subsequent point location. */
   otricopy(searchtri2, m->recenttri);
   /* Scout the beginnings of a path from the second endpoint */
   /*   toward the first.                                     */
-  if (scoutsegment(m, b, &searchtri2, endpoint1, newmark, err)) {
+  if (scoutsegment(m, b, &searchtri2, endpoint1, newmark)) {
     /* The segment was easily inserted. */
     return;
   }
@@ -12500,7 +12345,7 @@ int newmark;
 #endif /* not CDT_ONLY */
 #endif /* not REDUCED */
     /* Insert the segment directly into the triangulation. */
-    constrainededge(m, b, &searchtri1, endpoint2, newmark, err);
+    constrainededge(m, b, &searchtri1, endpoint2, newmark);
 #ifndef REDUCED
 #ifndef CDT_ONLY
   }
@@ -12562,7 +12407,7 @@ struct behavior *b;
 
 #ifdef ANSI_DECLARATORS
 void formskeleton(struct mesh *m, struct behavior *b, int *segmentlist,
-                  int *segmentmarkerlist, int numberofsegments, int *err)
+                  int *segmentmarkerlist, int numberofsegments)
 #else /* not ANSI_DECLARATORS */
 void formskeleton(m, b, segmentlist, segmentmarkerlist, numberofsegments)
 struct mesh *m;
@@ -12576,7 +12421,7 @@ int numberofsegments;
 
 #ifdef ANSI_DECLARATORS
 void formskeleton(struct mesh *m, struct behavior *b,
-                  FILE *polyfile, char *polyfilename, int *err)
+                  FILE *polyfile, char *polyfilename)
 #else /* not ANSI_DECLARATORS */
 void formskeleton(m, b, polyfile, polyfilename)
 struct mesh *m;
@@ -12606,11 +12451,7 @@ char *polyfilename;
       printf("Recovering segments in Delaunay triangulation.\n");
     }
 #ifdef TRILIBRARY
-#ifdef _MSC_VER
-    strcpy_s(polyfilename, 6, "input");
-#elif __GNUC__
     strcpy(polyfilename, "input");
-#endif
     m->insegments = numberofsegments;
     segmentmarkers = segmentmarkerlist != (int *) NULL;
     index = 0;
@@ -12699,10 +12540,7 @@ char *polyfilename;
                    b->firstnumber + i, polyfilename);
           }
         } else {
-          insertsegment(m, b, endpoint1, endpoint2, boundmarker, err);
-#ifdef TRILIBRARY
-          if (*err > 0) return;
-#endif
+          insertsegment(m, b, endpoint1, endpoint2, boundmarker);
         }
       }
     }
@@ -13395,7 +13233,7 @@ void precisionerror()
 #ifndef CDT_ONLY
 
 #ifdef ANSI_DECLARATORS
-void splitencsegs(struct mesh *m, struct behavior *b, int triflaws, int *err)
+void splitencsegs(struct mesh *m, struct behavior *b, int triflaws)
 #else /* not ANSI_DECLARATORS */
 void splitencsegs(m, b, triflaws)
 struct mesh *m;
@@ -13565,7 +13403,6 @@ int triflaws;
         /* Check whether the new vertex lies on an endpoint. */
         if (((newvertex[0] == eorg[0]) && (newvertex[1] == eorg[1])) ||
             ((newvertex[0] == edest[0]) && (newvertex[1] == edest[1]))) {
-#ifndef TRILIBRARY
           printf("Error:  Ran out of precision at (%.12g, %.12g).\n",
                  newvertex[0], newvertex[1]);
           printf("I attempted to split a segment to a smaller size than\n");
@@ -13573,23 +13410,14 @@ int triflaws;
           printf("  floating point arithmetic.\n");
           precisionerror();
           triexit(1);
-#else
-          *err = ERR_SPLIT_ENC_SEGS;
-		  return;
-#endif
         }
         /* Insert the splitting vertex.  This should always succeed. */
         success = insertvertex(m, b, newvertex, &enctri, &currentenc,
-                               1, triflaws, 0);
+                               1, triflaws);
         if ((success != SUCCESSFULVERTEX) && (success != ENCROACHINGVERTEX)) {
-#ifndef TRILIBRARY
           printf("Internal error in splitencsegs():\n");
           printf("  Failure to split a segment.\n");
           internalerror();
-#else
-          *err = ERR_SPLIT_ENC_SEGS;
-		  return;
-#endif
         }
         if (m->steinerleft > 0) {
           m->steinerleft--;
@@ -13669,6 +13497,7 @@ struct badtriang *badtri;
   REAL xi, eta;
   enum insertvertexresult success;
   int errorflag;
+  int i;
 
   decode(badtri->poortri, badotri);
   org(badotri, borg);
@@ -13688,11 +13517,7 @@ struct badtriang *badtri;
     errorflag = 0;
     /* Create a new vertex at the triangle's circumcenter. */
     newvertex = (vertex) poolalloc(&m->vertices);
-#ifndef NO_ACUTE
-    findNewSPLocation(m, b, borg, bdest, bapex, newvertex, &xi, &eta, 1, badotri);
-#else
     findcircumcenter(m, b, borg, bdest, bapex, newvertex, &xi, &eta, 1);
-#endif
 
     /* Check whether the new vertex lies on a triangle vertex. */
     if (((newvertex[0] == borg[0]) && (newvertex[1] == borg[1])) ||
@@ -13706,8 +13531,11 @@ struct badtriang *badtri;
       }
       vertexdealloc(m, newvertex);
     } else {
-      /* Interpolation of vertex attributes is done in insertvertex method. */
-
+      for (i = 2; i < 2 + m->nextras; i++) {
+        /* Interpolate the vertex attributes at the circumcenter. */
+        newvertex[i] = borg[i] + xi * (bdest[i] - borg[i])
+                              + eta * (bapex[i] - borg[i]);
+      }
       /* The new vertex must be in the interior, and therefore is a */
       /*   free vertex with a marker of zero.                       */
       setvertexmark(newvertex, 0);
@@ -13727,7 +13555,7 @@ struct badtriang *badtri;
       /* Insert the circumcenter, searching from the edge of the triangle, */
       /*   and maintain the Delaunay property of the triangulation.        */
       success = insertvertex(m, b, newvertex, &badotri, (struct osub *) NULL,
-                             1, 1, 1);
+                             1, 1);
       if (success == SUCCESSFULVERTEX) {
         if (m->steinerleft > 0) {
           m->steinerleft--;
@@ -13782,7 +13610,7 @@ struct badtriang *badtri;
 #ifndef CDT_ONLY
 
 #ifdef ANSI_DECLARATORS
-void enforcequality(struct mesh *m, struct behavior *b, int *err)
+void enforcequality(struct mesh *m, struct behavior *b)
 #else /* not ANSI_DECLARATORS */
 void enforcequality(m, b)
 struct mesh *m;
@@ -13808,10 +13636,7 @@ struct behavior *b;
     printf("  Splitting encroached subsegments.\n");
   }
   /* Fix encroached subsegments without noting bad triangles. */
-  splitencsegs(m, b, 0, err);
-#ifdef TRILIBRARY
-  if (*err > 0) return;
-#endif
+  splitencsegs(m, b, 0);
   /* At this point, if we haven't run out of Steiner points, the */
   /*   triangulation should be (conforming) Delaunay.            */
 
@@ -13843,10 +13668,7 @@ struct behavior *b;
         enqueuebadtriang(m, b, badtri);
         /* Fix any encroached subsegments that resulted. */
         /*   Record any new bad triangles that result.   */
-        splitencsegs(m, b, 1, err);
-#ifdef TRILIBRARY
-        if (*err > 0) return;
-#endif
+        splitencsegs(m, b, 1);
       } else {
         /* Return the bad triangle to the pool. */
         pooldealloc(&m->badtriangles, (VOID *) badtri);
@@ -15516,7 +15338,6 @@ char **argv;
 /*                                                                           */
 /*****************************************************************************/
 
-#ifndef TRILIBRARY
 #ifdef ANSI_DECLARATORS
 void quality_statistics(struct mesh *m, struct behavior *b)
 #else /* not ANSI_DECLARATORS */
@@ -15816,7 +15637,6 @@ struct behavior *b;
     printf("\n");
   }
 }
-#endif /* not TRILIBRARY */
 
 /*****************************************************************************/
 /*                                                                           */
@@ -15846,7 +15666,7 @@ struct behavior *b;
 #ifdef TRILIBRARY
 
 #ifdef ANSI_DECLARATORS
-void TRIANGLE_DLL_API triangulate(char *triswitches, struct triangulateio *in,
+void triangulate(char *triswitches, struct triangulateio *in,
                  struct triangulateio *out, struct triangulateio *vorout)
 #else /* not ANSI_DECLARATORS */
 void triangulate(triswitches, in, out, vorout)
@@ -15873,7 +15693,6 @@ char **argv;
   struct behavior b;
   REAL *holearray;                                        /* Array of holes. */
   REAL *regionarray;   /* Array of regional attributes and area constraints. */
-  int err;
 #ifndef TRILIBRARY
   FILE *polyfile;
 #endif /* not TRILIBRARY */
@@ -15887,20 +15706,13 @@ char **argv;
 #ifndef NO_TIMER
   gettimeofday(&tv0, &tz);
 #endif /* not NO_TIMER */
+
   triangleinit(&m);
 #ifdef TRILIBRARY
-  out->errorcode = err = 0;
-  parsecommandline(1, &triswitches, &b, &err);
-  if (err > 0) {
-    out->errorcode = err;
-    return;
-  }
+  parsecommandline(1, &triswitches, &b);
 #else /* not TRILIBRARY */
-  parsecommandline(argc, argv, &b, &err);
+  parsecommandline(argc, argv, &b);
 #endif /* not TRILIBRARY */
-#ifndef NO_ACUTE
-  acutepool_init(20, &b, &m.acute_mem);
-#endif
   m.steinerleft = b.steiner;
 
 #ifdef TRILIBRARY
@@ -15963,14 +15775,9 @@ char **argv;
       /* Insert PSLG segments and/or convex hull segments. */
 #ifdef TRILIBRARY
       formskeleton(&m, &b, in->segmentlist,
-                   in->segmentmarkerlist, in->numberofsegments, &err);
-      if (err > 0) {
-        triangledeinit(&m, &b); /* TODO: triangledeinit ok? */
-        out->errorcode = err;
-        return;
-      }
+                   in->segmentmarkerlist, in->numberofsegments);
 #else /* not TRILIBRARY */
-      formskeleton(&m, &b, polyfile, b.inpolyfilename, &err);
+      formskeleton(&m, &b, polyfile, b.inpolyfilename);
 #endif /* not TRILIBRARY */
     }
   }
@@ -16020,14 +15827,7 @@ char **argv;
 
 #ifndef CDT_ONLY
   if (b.quality && (m.triangles.items > 0)) {
-    enforcequality(&m, &b, &err);           /* Enforce angle and area constraints. */
-#ifdef TRILIBRARY
-    if (err > 0) {
-      triangledeinit(&m, &b); /* TODO: triangledeinit ok? */
-      out->errorcode = err;
-      return;
-    }
-#endif
+    enforcequality(&m, &b);           /* Enforce angle and area constraints. */
   }
 #endif /* not CDT_ONLY */
 
@@ -16188,10 +15988,8 @@ char **argv;
            1000l * (tv6.tv_sec - tv0.tv_sec) +
            (tv6.tv_usec - tv0.tv_usec) / 1000l);
 #endif /* not NO_TIMER */
-	
-#ifndef TRILIBRARY
+
     statistics(&m, &b);
-#endif /* not TRILIBRARY */
   }
 
 #ifndef REDUCED
@@ -16201,9 +15999,6 @@ char **argv;
   }
 #endif /* not REDUCED */
 
-#ifndef NO_ACUTE
-  acutepool_deinit(&m.acute_mem);
-#endif
   triangledeinit(&m, &b);
 #ifndef TRILIBRARY
   return 0;

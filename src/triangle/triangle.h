@@ -289,7 +289,6 @@ struct triangulateio {
   int *edgemarkerlist;            /* Not used with Voronoi diagram; out only */
   REAL *normlist;                /* Used only with Voronoi diagram; out only */
   int numberofedges;                                             /* Out only */
-  int errorcode;                                                 /* Out only */
 };
 
 #ifdef __cplusplus

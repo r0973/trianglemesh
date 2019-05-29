@@ -1,12 +1,8 @@
 
-#include <trianglemesh/trianglemesh.h>
-
-namespace mesh
-{
+#include <trianglemesh.h>
 
 namespace trianglemesh
 {
-
 
 void TriangleMesh::init(triangulateio& t)
 {
@@ -85,7 +81,7 @@ bool TriangleMesh::read_poly(const std::string& filename)
 	
 	*inFile >> numberofpoints;
 	*inFile >> meshdim;
-	*inFile >> in_.numberofpointattributes;
+	*inFile >> in.numberofpointattributes;
 	*inFile >> pointmarker;
 
 	if (meshdim != 2)
@@ -106,14 +102,14 @@ bool TriangleMesh::read_poly(const std::string& filename)
 
 		inFile = &NodeFile;
 	
-		*inFile >> in_.numberofpoints;
+		*inFile >> in.numberofpoints;
 		*inFile >> meshdim;
-		*inFile >> in_.numberofpointattributes;
+		*inFile >> in.numberofpointattributes;
 		*inFile >> pointmarker;
 	}
 	else
 	{   
-		in_.numberofpoints = numberofpoints;
+		in.numberofpoints = numberofpoints;
 	}
 	
 	if (meshdim != 2)
@@ -122,12 +118,12 @@ bool TriangleMesh::read_poly(const std::string& filename)
 	}
 
 	//Allocate arrays
-	if(in_.numberofpointattributes!=0)
+	if(in.numberofpointattributes!=0)
 	{
-		in_.pointattributelist = static_cast<REAL*>(
+		in.pointattributelist = static_cast<REAL*>(
 				std::malloc(
-					in_.numberofpoints * 
-					in_.numberofpointattributes * 
+					in.numberofpoints * 
+					in.numberofpointattributes * 
 					sizeof(REAL)
 				)
 			);
@@ -135,40 +131,40 @@ bool TriangleMesh::read_poly(const std::string& filename)
 
 	if(pointmarker)
 	{
-		in_.pointmarkerlist = static_cast<int*>(
+		in.pointmarkerlist = static_cast<int*>(
 				std::malloc(
-					in_.numberofpoints * 
+					in.numberofpoints * 
 					sizeof(int)
 				)
 			);
 	}
 
-	in_.pointlist = static_cast<REAL*>(
+	in.pointlist = static_cast<REAL*>(
 			 std::malloc(
-				 in_.numberofpoints * 
+				 in.numberofpoints * 
 				 2 * 
 				 sizeof(REAL)
 			)
 		);
 	
 	 //Read arrays from .node file
-	for(int i = 0, index; i < in_.numberofpoints; ++i)
+	for(int i = 0, index; i < in.numberofpoints; ++i)
 	{   
 		*inFile >> index;
 		
 		for(int j = 0; j < 2; ++j)
 		{
-			*inFile >> in_.pointlist[i*2+j]; 
+			*inFile >> in.pointlist[i*2+j]; 
 		}
 
-		for(int j = 0; j < in_.numberofpointattributes; ++j)    
+		for(int j = 0; j < in.numberofpointattributes; ++j)    
 		{
-			*inFile >> in_.pointattributelist[i * in_.numberofpointattributes + j];
+			*inFile >> in.pointattributelist[i * in.numberofpointattributes + j];
 		}
 		
 		if(pointmarker)
 		{
-			*inFile >> in_.pointmarkerlist[i];
+			*inFile >> in.pointmarkerlist[i];
 		}
 	};
 	
@@ -178,7 +174,7 @@ bool TriangleMesh::read_poly(const std::string& filename)
 		inFile = &PolyFile;
 	}
 
-	*inFile >> in_.numberofsegments;
+	*inFile >> in.numberofsegments;
 	
 	int segmentmarker;
 	
@@ -186,56 +182,56 @@ bool TriangleMesh::read_poly(const std::string& filename)
 	
 	if(segmentmarker)
 	{
-		in_.segmentmarkerlist = static_cast<int*>(
+		in.segmentmarkerlist = static_cast<int*>(
 				std::malloc(
-					in_.numberofsegments * 
+					in.numberofsegments * 
 					sizeof(int)
 				)
 			);
 	}
 
-	in_.segmentlist = static_cast<int*>(
+	in.segmentlist = static_cast<int*>(
 			std::malloc(
-				in_.numberofsegments * 
+				in.numberofsegments * 
 				2 * 
 				sizeof(int)
 			)
 		);
 	
-	for(int i = 0, index; i < in_.numberofsegments; ++i)
+	for(int i = 0, index; i < in.numberofsegments; ++i)
 	{   
 		*inFile >> index;
 		
 		for(int j = 0; j < 2; ++j)
 		{
-			*inFile >> in_.segmentlist[i * 2 + j];
+			*inFile >> in.segmentlist[i * 2 + j];
 		}
 		
 		if(segmentmarker)
 		{
-			*inFile >> in_.segmentmarkerlist[i];
+			*inFile >> in.segmentmarkerlist[i];
 		}
 	};
 	
-	*inFile >> in_.numberofholes;
+	*inFile >> in.numberofholes;
 	
-	if(in_.numberofholes !=0 )
+	if(in.numberofholes !=0 )
 	{   
-		in_.holelist = static_cast<REAL*>(
+		in.holelist = static_cast<REAL*>(
 				std::malloc(
-					in_.numberofholes * 
+					in.numberofholes * 
 					2 * 
 					sizeof(REAL)
 				)
 			);
 		
-		for(int i = 0, index; i < in_.numberofholes; ++i)
+		for(int i = 0, index; i < in.numberofholes; ++i)
 		{   
 			*inFile >> index;
 			
 			for(int j = 0; j < 2; ++j)
 			{
-				*inFile >> in_.holelist[i * 2 + j];
+				*inFile >> in.holelist[i * 2 + j];
 			}
 		}
 	}
@@ -254,9 +250,9 @@ bool TriangleMesh::read_poly(std::stringstream& PolyFile)
 	int meshdim;
 	int pointmarker;
 
-	PolyFile >> in_.numberofpoints;
+	PolyFile >> in.numberofpoints;
 	PolyFile >> meshdim;
-	PolyFile >> in_.numberofpointattributes;
+	PolyFile >> in.numberofpointattributes;
 	PolyFile >> pointmarker;
 
 	if (meshdim != 2)
@@ -264,7 +260,7 @@ bool TriangleMesh::read_poly(std::stringstream& PolyFile)
 		throw std::invalid_argument("TriangleMesh::readpoly: meshdim not equal to 2!");
 	}
 
-	if (in_.numberofpoints == 0)
+	if (in.numberofpoints == 0)
 	{
 		throw std::invalid_argument("TriangleMesh::readpoly: .node file was not found!");
 	}
@@ -275,12 +271,12 @@ bool TriangleMesh::read_poly(std::stringstream& PolyFile)
 	}
 
 	//Allocate arrays
-	if (in_.numberofpointattributes != 0)
+	if (in.numberofpointattributes != 0)
 	{
-		in_.pointattributelist = static_cast<REAL*>(
+		in.pointattributelist = static_cast<REAL*>(
 				std::malloc(
-					in_.numberofpoints * 
-					in_.numberofpointattributes * 
+					in.numberofpoints * 
+					in.numberofpointattributes * 
 					sizeof(REAL)
 				)
 			);
@@ -288,44 +284,44 @@ bool TriangleMesh::read_poly(std::stringstream& PolyFile)
 
 	if (pointmarker)
 	{
-		in_.pointmarkerlist = static_cast<int*>(
+		in.pointmarkerlist = static_cast<int*>(
 				std::malloc(
-					in_.numberofpoints * 
+					in.numberofpoints * 
 					sizeof(int)
 				)
 			);
 	}
 
-	in_.pointlist = static_cast<REAL*>(
+	in.pointlist = static_cast<REAL*>(
 			std::malloc(
-				in_.numberofpoints * 
+				in.numberofpoints * 
 				2 * 
 				sizeof(REAL)
 			)
 		);
 
 	//Read arrays from .node file
-	for (int i = 0, index; i< in_.numberofpoints; ++i)
+	for (int i = 0, index; i< in.numberofpoints; ++i)
 	{
 		PolyFile >> index;
 		
 		for (int j = 0; j < 2; ++j)
 		{
-			PolyFile >> in_.pointlist[i * 2 + j];
+			PolyFile >> in.pointlist[i * 2 + j];
 		}
 
-		for (int j = 0; j < in_.numberofpointattributes; ++j)
+		for (int j = 0; j < in.numberofpointattributes; ++j)
 		{
-			PolyFile >> in_.pointattributelist[i * in_.numberofpointattributes + j];
+			PolyFile >> in.pointattributelist[i * in.numberofpointattributes + j];
 		}
 		
 		if (pointmarker)
 		{
-			PolyFile >> in_.pointmarkerlist[i];
+			PolyFile >> in.pointmarkerlist[i];
 		}
 	};
 
-	PolyFile >> in_.numberofsegments;
+	PolyFile >> in.numberofsegments;
 
 	int segmentmarker;
 
@@ -333,56 +329,56 @@ bool TriangleMesh::read_poly(std::stringstream& PolyFile)
 
 	if (segmentmarker)
 	{
-		in_.segmentmarkerlist = static_cast<int*>(
+		in.segmentmarkerlist = static_cast<int*>(
 				std::malloc(
-					in_.numberofsegments * 
+					in.numberofsegments * 
 					sizeof(int)
 				)
 			);
 	}
 
-	in_.segmentlist = static_cast<int*>(
+	in.segmentlist = static_cast<int*>(
 			std::malloc(
-				in_.numberofsegments * 
+				in.numberofsegments * 
 				2 * 
 				sizeof(int)
 			)
 		);
 
-	for (int i = 0, index; i < in_.numberofsegments; ++i)
+	for (int i = 0, index; i < in.numberofsegments; ++i)
 	{
 		PolyFile >> index;
 	
 		for (int j = 0; j < 2; ++j)
 		{
-			PolyFile >> in_.segmentlist[i * 2 + j];
+			PolyFile >> in.segmentlist[i * 2 + j];
 		}
 	
 		if (segmentmarker)
 		{
-			PolyFile >> in_.segmentmarkerlist[i];
+			PolyFile >> in.segmentmarkerlist[i];
 		}
 	};
 
-	PolyFile >> in_.numberofholes;
+	PolyFile >> in.numberofholes;
 
-	if (in_.numberofholes != 0)
+	if (in.numberofholes != 0)
 	{
-		in_.holelist = static_cast<REAL*>(
+		in.holelist = static_cast<REAL*>(
 					std::malloc(
-						in_.numberofholes * 
+						in.numberofholes * 
 						2 * 
 						sizeof(REAL)
 					)
 				);
 		
-		for (int i = 0, index; i < in_.numberofholes; ++i)
+		for (int i = 0, index; i < in.numberofholes; ++i)
 		{
 			PolyFile >> index;
 
 			for (int j = 0; j < 2; ++j)
 			{
-				PolyFile >> in_.holelist[i * 2 + j];
+				PolyFile >> in.holelist[i * 2 + j];
 			}
 		}
 	}
@@ -423,20 +419,20 @@ bool TriangleMesh::build_mesh(
 
 bool TriangleMesh::refine_mesh(const std::string& triswitches)
 {
-    destroy(   out_, TOUTPUT);
-    destroy(vorout_, TOUTPUT);
+    destroy(   out, TOUTPUT);
+    destroy(vorout, TOUTPUT);
 
-    init(   out_);
-    init(vorout_);
+    init(   out);
+    init(vorout);
     
     triangulate(
 		const_cast<char*>(triswitches.c_str()),
-		&in_,
-		&out_,
-		&vorout_
+		&in,
+		&out,
+		&vorout
 	); 
 
-    replace(in_,out_);
+    replace(in,out);
 
 	return true;
     
@@ -567,7 +563,7 @@ bool TriangleMesh::replace(triangulateio& in, triangulateio& out)
 						)
 					);
 			
-			if(!in_.segmentlist)
+			if(!in.segmentlist)
 			{
 				throw std::runtime_error("TriangleMesh::replace: segmentlist was not allocated properly");
 			}
@@ -593,7 +589,7 @@ bool TriangleMesh::replace(triangulateio& in, triangulateio& out)
 					)
 				);
 
-			if (!in_.segmentmarkerlist)
+			if (!in.segmentmarkerlist)
 			{
 				throw std::runtime_error("TriangleMesh::replace: segmentmarkerlist was not allocated properly");
 			}
@@ -609,62 +605,62 @@ bool TriangleMesh::replace(triangulateio& in, triangulateio& out)
 		};
 	};
   
-	if (out_.numberofedges != 0)
+	if (out.numberofedges != 0)
 	{
-		in_.numberofedges = out_.numberofedges;
+		in.numberofedges = out.numberofedges;
 
 		//copy edgelist
-		if (out_.edgelist != 0)
+		if (out.edgelist != 0)
 		{
-			in_.edgelist = static_cast<int *>(
+			in.edgelist = static_cast<int *>(
 					std::malloc(
-						in_.numberofedges * 
+						in.numberofedges * 
 						2 * 
 						sizeof(int)
 					)
 				);
 
-			if (!in_.edgelist)
+			if (!in.edgelist)
 			{
 				throw std::runtime_error("TriangleMesh::replace: edgelist was not allocated properly");
 			}
 
-			for (int i = 0; i < in_.numberofedges; ++i)
+			for (int i = 0; i < in.numberofedges; ++i)
 			{
 				for (int j = 0; j < 2; ++j)
 				{
-					in_.edgelist[i * 2 + j] = out_.edgelist[i * 2 + j];
+					in.edgelist[i * 2 + j] = out.edgelist[i * 2 + j];
 				}
 			}
 		}
 
 		//copy edgemarkerlist
-		if (out_.edgemarkerlist != 0)
+		if (out.edgemarkerlist != 0)
 		{
-			in_.edgemarkerlist = static_cast<int *>(
+			in.edgemarkerlist = static_cast<int *>(
 					std::malloc(
-						in_.numberofedges * 
+						in.numberofedges * 
 						sizeof(int)
 					)
 				);
 
-			if (!in_.edgemarkerlist)
+			if (!in.edgemarkerlist)
 			{
 				throw std::runtime_error("TriangleMesh::replace: edgemarkerlist was not allocated properly");
 			}
 
-			for (int i = 0; i < in_.numberofedges; ++i)
+			for (int i = 0; i < in.numberofedges; ++i)
 			{
-				in_.edgemarkerlist[i] = out_.edgemarkerlist[i];
+				in.edgemarkerlist[i] = out.edgemarkerlist[i];
 			}
 		}
 	};
 
-    //for(int i=0; i<in_.numberofedges; ++i)
+    //for(int i=0; i<in.numberofedges; ++i)
     //{   for(int j=0; j<2; ++j)
-    //        in_.edgelist[i*2+j] = out_.edgelist[i*2+j];
-    //    if(out_.edgemarkerlist != 0)
-    //        in_.edgemarkerlist[i] = out_.edgemarkerlist[i];
+    //        in.edgelist[i*2+j] = out.edgelist[i*2+j];
+    //    if(out.edgemarkerlist != 0)
+    //        in.edgemarkerlist[i] = out.edgemarkerlist[i];
     //}
 
 	return true;
@@ -692,11 +688,11 @@ bool TriangleMesh::write_msh2(const std::string& filename)
 		<< "2.2 0 8"          << "\n"
 		<< "$EndMeshFormat"   << "\n"
 		<< "$Nodes"           << "\n" 
-		<< in_.numberofpoints << "\n";
+		<< in.numberofpoints << "\n";
 	
 	//Read arrays from .node file
 	for (unsigned int i = 0; 
-					  i < static_cast<unsigned int>(in_.numberofpoints); 
+					  i < static_cast<unsigned int>(in.numberofpoints); 
 					  ++i
 		)
 	{
@@ -704,16 +700,16 @@ bool TriangleMesh::write_msh2(const std::string& filename)
 	
 		for (unsigned int j = 0; j<2; ++j)
 		{
-			out << in_.pointlist[i * 2 + j] << " ";
+			out << in.pointlist[i * 2 + j] << " ";
 		}
 	
 		//z coordinate
 		out << 0 << "\n";
 	};
 	
-	const unsigned int n_all_elements = //in_.numberofpoints    +
-										//in_.numberofsegments  +
-										in_.numberoftriangles;
+	const unsigned int n_all_elements = //in.numberofpoints    +
+										//in.numberofsegments  +
+										in.numberoftriangles;
 	
 	out << "$EndNodes"    << "\n" 
 		<< "$Elements"    << "\n" 
@@ -722,7 +718,7 @@ bool TriangleMesh::write_msh2(const std::string& filename)
 	unsigned int serial_number = 0;
 
 	for (unsigned int i = 0; 
-					  i < static_cast<unsigned int>(in_.numberoftriangles); 
+					  i < static_cast<unsigned int>(in.numberoftriangles); 
 					  ++i, 
 					  ++serial_number
 		)
@@ -733,11 +729,11 @@ bool TriangleMesh::write_msh2(const std::string& filename)
 			<< 1 << " "  /* physical domain */
 			<< 9 << " "; /* elemetary domain - let it be the same */
 
-		//for(int i=0; i< in_.numberoftriangles; ++i)
+		//for(int i=0; i< in.numberoftriangles; ++i)
 		{   
-			for(int j=0; j<in_.numberofcorners; ++j)
+			for(int j=0; j<in.numberofcorners; ++j)
 			{
-				out << in_.trianglelist[i*in_.numberofcorners+j]<< " ";
+				out << in.trianglelist[i*in.numberofcorners+j]<< " ";
 			}
 			
 			out << "\n";
@@ -775,32 +771,32 @@ bool TriangleMesh::write_nodes(const std::string& nodefilename)
 	// number of dimensions, 
 	// number of vertex attributes, 
 	// and number of boundary markers (zero or one)
-	outfile << in_.numberofpoints << " " 
+	outfile << in.numberofpoints << " " 
 			<< 2 << " " 
-			<< in_.numberofpointattributes << " " 
-			<< ((in_.pointmarkerlist != 0) ? "1" : "0") 
+			<< in.numberofpointattributes << " " 
+			<< ((in.pointmarkerlist != 0) ? "1" : "0") 
 			<< "\n";
 
-	for (int i = 0, l = 1; i < in_.numberofpoints; ++i, ++l)
+	for (int i = 0, l = 1; i < in.numberofpoints; ++i, ++l)
 	{
 		outfile << l << " ";
 		
 		// X and y coordinates
 		for (int j = 0; j < 2; ++j)
 		{
-			outfile << in_.pointlist[i * 2 + j] << "   ";
+			outfile << in.pointlist[i * 2 + j] << "   ";
 		}
 		
 		// Vertex attributes
-		if (in_.numberofpointattributes != 0)
+		if (in.numberofpointattributes != 0)
 		{
-			outfile << in_.pointattributelist[i] << "   ";
+			outfile << in.pointattributelist[i] << "   ";
 		}
 		
 		// Vertex markers
-		if (in_.pointmarkerlist != 0)
+		if (in.pointmarkerlist != 0)
 		{
-			outfile << in_.pointmarkerlist[i];
+			outfile << in.pointmarkerlist[i];
 		}
 
 		outfile << "\n";
@@ -822,7 +818,7 @@ bool TriangleMesh::write_edges(const std::string& edgefilename)
 		throw std::runtime_error(str + " cannot be opened for writing!");
 	}
 
-	if (!in_.edgelist)
+	if (!in.edgelist)
 	{
 		outfile << "edges list is empty, "
 				<< "because switch for edges generation was not defined."
@@ -832,22 +828,22 @@ bool TriangleMesh::write_edges(const std::string& edgefilename)
 	}
 
 	// Number of edges, number of boundary markers (zero or one)
-	outfile << in_.numberofedges << " " 
-			<< ((in_.edgemarkerlist != 0) ? "1" : "0") 
+	outfile << in.numberofedges << " " 
+			<< ((in.edgemarkerlist != 0) ? "1" : "0") 
 			<< "\n";
 	
-	for (int i = 0, l = 1; i < in_.numberofedges; ++i, ++l)
+	for (int i = 0, l = 1; i < in.numberofedges; ++i, ++l)
 	{
 		outfile << l << " ";
 		
 		for (int j = 0; j < 2; ++j)
 		{
-			outfile << in_.edgelist[i * 2 + j] << " ";
+			outfile << in.edgelist[i * 2 + j] << " ";
 		}
 
-		if (in_.edgemarkerlist != 0)
+		if (in.edgemarkerlist != 0)
 		{
-			outfile << in_.edgemarkerlist[i];
+			outfile << in.edgemarkerlist[i];
 		}
 
 		outfile << "\n";
@@ -870,22 +866,22 @@ bool TriangleMesh::write_elems(const std::string& elementsfilename)
 	}
 
 	/* Number of triangles, vertices per triangle, attributes per triangle. */
-	outfile << in_.numberoftriangles << " " 
-			<< in_.numberofcorners   << " " 
-			<< ((in_.numberoftriangleattributes != 0) ? "1" : "0") 
+	outfile << in.numberoftriangles << " " 
+			<< in.numberofcorners   << " " 
+			<< ((in.numberoftriangleattributes != 0) ? "1" : "0") 
 			<< "\n";
 
-	for (int i = 0, l = 1; i < in_.numberoftriangles; ++i, ++l)
+	for (int i = 0, l = 1; i < in.numberoftriangles; ++i, ++l)
 	{
 		outfile << l << " ";
 		
-		for (int j = 0; j < in_.numberofcorners; ++j)
+		for (int j = 0; j < in.numberofcorners; ++j)
 		{
-			outfile << in_.trianglelist[i * in_.numberofcorners + j] << " ";
+			outfile << in.trianglelist[i * in.numberofcorners + j] << " ";
 		}
-		for (int j = 0; j < in_.numberoftriangleattributes; ++j)
+		for (int j = 0; j < in.numberoftriangleattributes; ++j)
 		{
-			outfile << in_.triangleattributelist[i * in_.numberoftriangleattributes + j] << " ";
+			outfile << in.triangleattributelist[i * in.numberoftriangleattributes + j] << " ";
 		}
 		
 		outfile << "\n";
@@ -928,7 +924,7 @@ bool TriangleMesh::read_nodes(const std::string& filename)
 			throw std::runtime_error("TriangleMesh::read_mesh: file was not found or could not be read!");
 		}
 
-        NodeFile >> in_.numberofpoints;
+        NodeFile >> in.numberofpoints;
         
         int meshdim;
         
@@ -939,26 +935,26 @@ bool TriangleMesh::read_nodes(const std::string& filename)
 			return false;
         }
         
-        NodeFile >> in_.numberofpointattributes;
+        NodeFile >> in.numberofpointattributes;
         
         int pointmarker;
 
         NodeFile >> pointmarker;
         
-        in_.pointlist = static_cast<REAL*>(
+        in.pointlist = static_cast<REAL*>(
 				std::malloc(
-					in_.numberofpoints * 
+					in.numberofpoints * 
 					2 * 
 					sizeof(REAL)
 				)
 			);
         
-        if(in_.numberofpointattributes!=0)
+        if(in.numberofpointattributes!=0)
 		{
-			in_.pointattributelist = static_cast<REAL*>(
+			in.pointattributelist = static_cast<REAL*>(
 					std::malloc(
-						in_.numberofpoints * 
-						in_.numberofpointattributes * 
+						in.numberofpoints * 
+						in.numberofpointattributes * 
 						sizeof(REAL)
 					)
 				);
@@ -966,32 +962,32 @@ bool TriangleMesh::read_nodes(const std::string& filename)
 
         if(pointmarker)
 		{
-			in_.pointmarkerlist = static_cast<int*>(
+			in.pointmarkerlist = static_cast<int*>(
 					std::malloc(
-						in_.numberofpoints * 
+						in.numberofpoints * 
 						sizeof(int)
 					)
 				);
 		}
         
-        for(int i = 0, index; i < in_.numberofpoints; ++i)
+        for(int i = 0, index; i < in.numberofpoints; ++i)
         {   
 			NodeFile >> index;
             
 			for(int j = 0; j < 2; ++j)
 			{
-				NodeFile >> in_.pointlist[i * 2 + j]; 
+				NodeFile >> in.pointlist[i * 2 + j]; 
 			}
 			
 			//if(pointattribute)
-            for(int j = 0; j < in_.numberofpointattributes; ++j)    
+            for(int j = 0; j < in.numberofpointattributes; ++j)    
 			{
-				NodeFile >> in_.pointattributelist[i * in_.numberofpointattributes + j];
+				NodeFile >> in.pointattributelist[i * in.numberofpointattributes + j];
 			}
 			
 			if(pointmarker)
 			{
-				NodeFile >> in_.pointmarkerlist[i];
+				NodeFile >> in.pointmarkerlist[i];
 			}
         };
 
@@ -1008,15 +1004,15 @@ bool TriangleMesh::read_edges(const std::string& filename)
 		
 		std::ifstream EdgeFile(str.c_str(), std::ios::in);
         
-        EdgeFile >> in_.numberofedges;
+        EdgeFile >> in.numberofedges;
         
         int edgemarker;
         
 		EdgeFile >> edgemarker;
         
-        in_.edgelist = static_cast<int*>(
+        in.edgelist = static_cast<int*>(
 				std::malloc(
-					in_.numberofedges * 
+					in.numberofedges * 
 					2 * 
 					sizeof(int)
 				)
@@ -1024,26 +1020,26 @@ bool TriangleMesh::read_edges(const std::string& filename)
         
         if(edgemarker)
 		{
-			in_.edgemarkerlist = static_cast<int*>(
+			in.edgemarkerlist = static_cast<int*>(
 					std::malloc(
-						in_.numberofedges * 
+						in.numberofedges * 
 						sizeof(int)
 					)
 				);
 		}
 
-        for(int i = 0, index; i < in_.numberofedges; ++i)
+        for(int i = 0, index; i < in.numberofedges; ++i)
         {   
 			EdgeFile >> index;
             
 			for(int j = 0; j < 2; ++j)
 			{
-				EdgeFile >> in_.edgelist[i * 2 + j]; 
+				EdgeFile >> in.edgelist[i * 2 + j]; 
 			}
 			
 			if(edgemarker)
 			{
-				EdgeFile >> in_.edgemarkerlist[i];
+				EdgeFile >> in.edgemarkerlist[i];
 			}
 		};
 
@@ -1061,41 +1057,41 @@ bool TriangleMesh::read_ele(const std::string& filename)
         
 		std::ifstream EleFile(str.c_str(),std::ios::in);
         
-        EleFile >> in_.numberoftriangles;
-        EleFile >> in_.numberofcorners;
+        EleFile >> in.numberoftriangles;
+        EleFile >> in.numberofcorners;
         
-        EleFile >> in_.numberoftriangleattributes;
+        EleFile >> in.numberoftriangleattributes;
         
-        in_.trianglelist = static_cast<int*>(
+        in.trianglelist = static_cast<int*>(
 				std::malloc(
-					in_.numberoftriangles * 
-					in_.numberofcorners * 
+					in.numberoftriangles * 
+					in.numberofcorners * 
 					sizeof(int)
 				)
 			);
         
-        if(in_.numberoftriangleattributes!=0)
+        if(in.numberoftriangleattributes!=0)
 		{
-			in_.triangleattributelist = static_cast<REAL*>(
+			in.triangleattributelist = static_cast<REAL*>(
 					std::malloc(
-						in_.numberofpoints * 
-						in_.numberoftriangleattributes * 
+						in.numberofpoints * 
+						in.numberoftriangleattributes * 
 						sizeof(REAL)
 					)
 				);
 		}
 
-        for(int i = 0, index; i < in_.numberoftriangles; ++i)
+        for(int i = 0, index; i < in.numberoftriangles; ++i)
         {   
 			EleFile >> index;
             
-			for(int j = 0; j < in_.numberofcorners; ++j)
+			for(int j = 0; j < in.numberofcorners; ++j)
 			{
-				EleFile >> in_.trianglelist[i * in_.numberofcorners + j]; 
+				EleFile >> in.trianglelist[i * in.numberofcorners + j]; 
 			}
-			for(int j = 0; j < in_.numberoftriangleattributes; ++j)
+			for(int j = 0; j < in.numberoftriangleattributes; ++j)
 			{
-				EleFile >> in_.triangleattributelist[i * in_.numberoftriangleattributes + j];
+				EleFile >> in.triangleattributelist[i * in.numberoftriangleattributes + j];
 			}
 		}
 
@@ -1119,11 +1115,11 @@ bool TriangleMesh::write_msh2(std::stringstream& outfile)
 			<< "2.2 0 8"          << "\n"
 			<<"$EndMeshFormat"    << "\n"
 			<< "$Nodes"           << "\n" 
-			<< in_.numberofpoints << "\n";
+			<< in.numberofpoints << "\n";
 	
 	//Read arrays from .node file
 	for (unsigned int i = 0; 
-					  i < static_cast<unsigned int>(in_.numberofpoints); 
+					  i < static_cast<unsigned int>(in.numberofpoints); 
 					  ++i
 		)
 	{
@@ -1131,16 +1127,16 @@ bool TriangleMesh::write_msh2(std::stringstream& outfile)
 	
 		for (unsigned int j = 0; j < 2; ++j)
 		{
-			outfile << in_.pointlist[i * 2 + j] << " ";
+			outfile << in.pointlist[i * 2 + j] << " ";
 		}
 	
 		//z coordinate
 		outfile << 0 << "\n";
 	};
 
-	const unsigned int n_all_elements = //in_.numberofpoints    +
-										//in_.numberofsegments  +
-										in_.numberoftriangles;
+	const unsigned int n_all_elements = //in.numberofpoints    +
+										//in.numberofsegments  +
+										in.numberoftriangles;
 
 	outfile << "$EndNodes"    << "\n"
 			<< "$Elements"    << "\n" 
@@ -1149,7 +1145,7 @@ bool TriangleMesh::write_msh2(std::stringstream& outfile)
 	unsigned int serial_number = 0;
 
 	for (unsigned int i = 0; 
-					  i < static_cast<unsigned int>(in_.numberoftriangles); 
+					  i < static_cast<unsigned int>(in.numberoftriangles); 
 					  ++i, 
 					  ++serial_number
 		)
@@ -1160,11 +1156,11 @@ bool TriangleMesh::write_msh2(std::stringstream& outfile)
 				<< 1 << " "  /* physical domain */
 				<< 9 << " "; /* elemetary domain - let it be the same */
 
-		//for(int i=0; i< in_.numberoftriangles; ++i)
+		//for(int i=0; i< in.numberoftriangles; ++i)
 		{   
-			for (int j = 0; j < in_.numberofcorners; ++j)
+			for (int j = 0; j < in.numberofcorners; ++j)
 			{
-				outfile << in_.trianglelist[i * in_.numberofcorners + j] << " ";
+				outfile << in.trianglelist[i * in.numberofcorners + j] << " ";
 			}
 			
 			outfile << "\n";
@@ -1191,32 +1187,32 @@ bool TriangleMesh::write_nodes(std::stringstream& outfile)
 	// number of dimensions, 
 	// number of vertex attributes, 
 	// and number of boundary markers (zero or one)
-	outfile << in_.numberofpoints << " " 
+	outfile << in.numberofpoints << " " 
 			<< 2 << " " 
-			<< in_.numberofpointattributes << " " 
-			<< ((in_.pointmarkerlist != 0) ? "1" : "0") 
+			<< in.numberofpointattributes << " " 
+			<< ((in.pointmarkerlist != 0) ? "1" : "0") 
 			<< "\n";
 
-	for (int i = 0, l = 1; i < in_.numberofpoints; ++i, ++l)
+	for (int i = 0, l = 1; i < in.numberofpoints; ++i, ++l)
 	{
 		outfile << l << " ";
 		
 		// X and y coordinates
 		for (int j = 0; j < 2; ++j)
 		{
-			outfile << in_.pointlist[i * 2 + j] << "   ";
+			outfile << in.pointlist[i * 2 + j] << "   ";
 		}
 		
 		// Vertex attributes
-		if (in_.numberofpointattributes != 0)
+		if (in.numberofpointattributes != 0)
 		{
-			outfile << in_.pointattributelist[i] << "   ";
+			outfile << in.pointattributelist[i] << "   ";
 		}
 		
 		// Vertex markers
-		if (in_.pointmarkerlist != 0)
+		if (in.pointmarkerlist != 0)
 		{
-			outfile << in_.pointmarkerlist[i];
+			outfile << in.pointmarkerlist[i];
 		}
 
 		outfile << "\n";
@@ -1233,7 +1229,7 @@ bool TriangleMesh::write_edges(std::stringstream& outfile)
 		throw std::runtime_error("TriangleMesh::write_edges: stream cannot be opened for writing!");
 	}
 
-	if (!in_.edgelist)
+	if (!in.edgelist)
 	{
 		outfile << "edges list is empty, "
 				<< "because switch for edges generation was not defined. "
@@ -1243,22 +1239,22 @@ bool TriangleMesh::write_edges(std::stringstream& outfile)
 	}
 
 	// Number of edges, number of boundary markers (zero or one)
-	outfile << in_.numberofedges << " " 
-			<< ((in_.edgemarkerlist != 0) ? "1" : "0") 
+	outfile << in.numberofedges << " " 
+			<< ((in.edgemarkerlist != 0) ? "1" : "0") 
 			<< "\n";
 
-	for (int i = 0, l = 1; i < in_.numberofedges; ++i, ++l)
+	for (int i = 0, l = 1; i < in.numberofedges; ++i, ++l)
 	{
 		outfile << l << " ";
 		
 		for (int j = 0; j < 2; ++j)
 		{
-			outfile << in_.edgelist[i * 2 + j] << " ";
+			outfile << in.edgelist[i * 2 + j] << " ";
 		}
 
-		if (in_.edgemarkerlist != 0)
+		if (in.edgemarkerlist != 0)
 		{
-			outfile << in_.edgemarkerlist[i];
+			outfile << in.edgemarkerlist[i];
 		}
 
 		outfile << "\n";
@@ -1275,23 +1271,23 @@ bool TriangleMesh::write_elems(std::stringstream& outfile)
 	}
 
 	// Number of triangles, vertices per triangle, attributes per triangle
-	outfile << in_.numberoftriangles << " " 
-			<< in_.numberofcorners   << " " 
-			<< ((in_.numberoftriangleattributes != 0) ? "1" : "0") 
+	outfile << in.numberoftriangles << " " 
+			<< in.numberofcorners   << " " 
+			<< ((in.numberoftriangleattributes != 0) ? "1" : "0") 
 			<< "\n";
 
-	for (int i = 0, l = 1; i < in_.numberoftriangles; ++i, ++l)
+	for (int i = 0, l = 1; i < in.numberoftriangles; ++i, ++l)
 	{
 		outfile << l << " ";
 		
-		for (int j = 0; j < in_.numberofcorners; ++j)
+		for (int j = 0; j < in.numberofcorners; ++j)
 		{
-			outfile << in_.trianglelist[i * in_.numberofcorners + j] << " ";
+			outfile << in.trianglelist[i * in.numberofcorners + j] << " ";
 		}
 		
-		for (int j = 0; j < in_.numberoftriangleattributes; ++j)
+		for (int j = 0; j < in.numberoftriangleattributes; ++j)
 		{
-			outfile << in_.triangleattributelist[i * in_.numberoftriangleattributes + j] 
+			outfile << in.triangleattributelist[i * in.numberoftriangleattributes + j] 
 					<< " ";
 		}
 		
@@ -1302,5 +1298,3 @@ bool TriangleMesh::write_elems(std::stringstream& outfile)
 }
 
 } //namespace trianglemesh
-
-} //namespace mesh

@@ -1,4 +1,3 @@
-
 #ifndef TRIANGLEMESH_H
 #define TRIANGLEMESH_H
 
@@ -28,22 +27,21 @@
 #include <precompiled.h>
 
 
-namespace mesh
-{
-
 namespace trianglemesh
 {
 
 extern "C" {
 
-#ifndef REAL
-#define REAL double
-#endif
-
+//#ifndef REAL
+//#define REAL double
+//#endif
+//
+//#ifndef	ANSI_DECLARATORS
 //#define	ANSI_DECLARATORS
+//#endif
 //#define VOID int
 
-#include </detail/triangle/triangle.h>
+#include <triangle/triangle.h>
 
 }
   
@@ -57,24 +55,24 @@ protected:
 	};
 
 public:
-    triangulateio in_;
-    triangulateio out_;
-    triangulateio vorout_;
+    triangulateio in;
+    triangulateio out;
+    triangulateio vorout;
     
 public:
     TriangleMesh()
     {
-      init(in_);
-      init(out_);
-      init(vorout_);
+      init(in);
+      init(out);
+      init(vorout);
     }
 
 public:
 	virtual ~TriangleMesh()
     { 
-      destroy(in_,      TINPUT);
-      destroy(out_,    TOUTPUT);
-      destroy(vorout_, TOUTPUT);
+      destroy(in,      TINPUT);
+      destroy(out,    TOUTPUT);
+      destroy(vorout, TOUTPUT);
     }
 
 public:
@@ -148,8 +146,6 @@ protected:
 
 
 } //namespace trianglemesh
-
-} //namespace mesh
 
 #include<detail/trianglemesh.inl>
 

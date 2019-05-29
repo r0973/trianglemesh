@@ -1,7 +1,3 @@
-
-namespace mesh
-{
-
 namespace trianglemesh
 {
 
@@ -12,7 +8,10 @@ json_type TriangleMesh::write_nodes()
 	
 	//vertices coordinates
 	int i = 0; 
-	for (auto it = in_.pointlist; it != in_.pointlist + 2 * in_.numberofpoints; ++it)
+	for (auto it  = in.pointlist; 
+			  it != in.pointlist + 2 * in.numberofpoints; 
+			  ++it
+		)
 	{
 		if (i++ % 2 == 0)
 		{
@@ -26,22 +25,22 @@ json_type TriangleMesh::write_nodes()
 
 
     //vertices attributes
-	if (in_.numberofpointattributes != 0)
+	if (in.numberofpointattributes != 0)
     {   
 		std::copy(
-			in_.pointattributelist, 
-			in_.pointattributelist + in_.numberofpoints, 
+			in.pointattributelist, 
+			in.pointattributelist + in.numberofpoints, 
 			std::back_inserter(json["pattrib"])
 		);
     }
 	
 
     //vertices markers
-	if (in_.pointmarkerlist != 0)
+	if (in.pointmarkerlist != 0)
     {   
 		std::copy(
-			in_.pointmarkerlist, 
-			in_.pointmarkerlist + in_.numberofpoints, 
+			in.pointmarkerlist, 
+			in.pointmarkerlist + in.numberofpoints, 
 			std::back_inserter(json["pmarker"])
 		);
 	}
@@ -55,16 +54,16 @@ json_type TriangleMesh::write_edges()
 	json_type json;
 	
 	std::copy(
-		in_.edgelist, 
-		in_.edgelist + 2 * in_.numberofedges, 
+		in.edgelist, 
+		in.edgelist + 2 * in.numberofedges, 
 		std::back_inserter(json["enid"])
 	);
 
-	if (in_.edgemarkerlist != 0)
+	if (in.edgemarkerlist != 0)
 	{
 		std::copy(
-			in_.edgemarkerlist, 
-			in_.edgemarkerlist + in_.numberofedges, 
+			in.edgemarkerlist, 
+			in.edgemarkerlist + in.numberofedges, 
 			std::back_inserter(json["emarker"])
 		);
 	}
@@ -78,16 +77,16 @@ json_type TriangleMesh::write_elems()
 	json_type json;
 	
 	std::copy(
-		in_.trianglelist, 
-		in_.trianglelist + in_.numberofcorners * in_.numberoftriangles, 
+		in.trianglelist, 
+		in.trianglelist + in.numberofcorners * in.numberoftriangles, 
 		std::back_inserter(json["elnid"])
 	);
 
-	if (in_.numberoftriangleattributes != 0)
+	if (in.numberoftriangleattributes != 0)
 	{
 		std::copy(
-			in_.triangleattributelist, 
-			in_.triangleattributelist + in_.numberoftriangleattributes * in_.numberoftriangles, 
+			in.triangleattributelist, 
+			in.triangleattributelist + in.numberoftriangleattributes * in.numberoftriangles, 
 			std::back_inserter(json["eattrib"])
 		);
 	}
@@ -96,5 +95,3 @@ json_type TriangleMesh::write_elems()
 }
 
 } //namespace trianglemesh
-
-} //namespace mesh
