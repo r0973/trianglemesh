@@ -33,4 +33,4 @@
 
 *.swp
 *.zip
-./build
+/build
