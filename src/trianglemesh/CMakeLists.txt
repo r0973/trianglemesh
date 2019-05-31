@@ -10,7 +10,7 @@ include_directories(${PROJECT_SOURCE_DIR})
 set(
 	TRIANGLEMESH_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/trianglemesh.h
-	${CMAKE_CURRENT_SOURCE_DIR}/detail/trianglemesh.cpp
+	#${CMAKE_CURRENT_SOURCE_DIR}/detail/trianglemesh.cpp
 )
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -53,7 +53,7 @@ target_link_libraries(
 
 target_include_directories(
 	${PROJECT_NAME}	
-    PUBLIC 
+	PUBLIC 
     ${PROJECT_SOURCE_DIR}
 )
 
