@@ -1,7 +1,7 @@
 namespace trianglemesh
 {
 
-void TriangleMesh::init(triangulateio& t)
+void TriangleMesh::init(triangulateio& t) noexcept(true)
 {
 	t.pointlist                  = static_cast<REAL*>(NULL);
 	t.pointattributelist         = static_cast<REAL*>(NULL);
@@ -34,7 +34,7 @@ void TriangleMesh::init(triangulateio& t)
 }
 
 
-void TriangleMesh::destroy(triangulateio& t, IO_Type io_type)
+void TriangleMesh::destroy(triangulateio& t, IO_Type io_type) noexcept(true)
 {
 	std::free(t.pointlist            );
 	std::free(t.pointattributelist   );
@@ -57,11 +57,11 @@ void TriangleMesh::destroy(triangulateio& t, IO_Type io_type)
 	std::free (t.normlist      );
 }
 
-bool TriangleMesh::read_poly(const std::string& filename)
-{
-	std::string str;
 
-	str = filename + std::string(".poly");
+bool TriangleMesh::read_poly(const std::string& filename) noexcept(false)
+{
+
+	std::string str(filename + std::string(".poly"));
 	
 	std::ifstream PolyFile(str.c_str(),std::ios::in);
 	
@@ -390,26 +390,51 @@ bool TriangleMesh::build_mesh(
 	const std::string& delimiter, 
 	const std::string& polyfilename, 
 	const std::string& switches
-)
+) noexcept(false)
 {
-   std::string filename    = path + delimiter + polyfilename;
-   std::string triswitches = switches;
+	try
+	{
+		std::string filename    = path + delimiter + polyfilename;
+		std::string triswitches = switches;
 
-   read_poly(filename);
-   refine_mesh(triswitches);
+		read_poly(filename);
+		refine_mesh(triswitches);
+	}
+	catch(const std::exception& e)
+	{
+		throw std::runtime_error(
+				std::string(	
+					std::string("TriangleMesh::build_mesh: ") +
+					e.what()
+				).c_str()
+			);
 
-   return true;
+	}
+
+	return true;
 }
 
 
 bool TriangleMesh::build_mesh(
 	const std::string& switches, 
 	std::stringstream& poly_file
-)
+) noexcept(false)
 {
+	try
+	{
+		read_poly(poly_file);
+		refine_mesh(switches);
+	}
+	catch(const std::exception& e)
+	{
+		throw std::runtime_error(
+				std::string(	
+					std::string("TriangleMesh::build_mesh: ") +
+					e.what()
+				).c_str()
+			);
 
-	read_poly(poly_file);
-	refine_mesh(switches);
+	}
 
 	return true;
 }
@@ -417,20 +442,33 @@ bool TriangleMesh::build_mesh(
 
 bool TriangleMesh::refine_mesh(const std::string& triswitches)
 {
-    destroy(   out, TOUTPUT);
-    destroy(vorout, TOUTPUT);
+	try
+	{   
+	   	destroy(   out, TOUTPUT);
+		destroy(vorout, TOUTPUT);
 
-    init(   out);
-    init(vorout);
-    
-    triangulate(
-		const_cast<char*>(triswitches.c_str()),
-		&in,
-		&out,
-		&vorout
-	); 
+		init(   out);
+		init(vorout);
 
-    replace(in,out);
+		triangulate(
+				const_cast<char*>(triswitches.c_str()),
+				&in,
+				&out,
+				&vorout
+				); 
+
+		replace(in,out);
+	}
+	catch(const std::exception& e)
+	{
+		throw std::runtime_error(
+				std::string(	
+					std::string("TriangleMesh::refine_mesh: ") +
+					e.what()
+				).c_str()
+			);
+
+	}
 
 	return true;
     
@@ -654,13 +692,6 @@ bool TriangleMesh::replace(triangulateio& in, triangulateio& out)
 		}
 	};
 
-    //for(int i=0; i<in.numberofedges; ++i)
-    //{   for(int j=0; j<2; ++j)
-    //        in.edgelist[i*2+j] = out.edgelist[i*2+j];
-    //    if(out.edgemarkerlist != 0)
-    //        in.edgemarkerlist[i] = out.edgemarkerlist[i];
-    //}
-
 	return true;
 }
 
@@ -668,8 +699,7 @@ bool TriangleMesh::replace(triangulateio& in, triangulateio& out)
 bool TriangleMesh::write_msh2(const std::string& filename)
 {
 	std::ofstream out(filename.c_str());
-	
-	//require(out, "File " + file + " cannot be opened for writing!");
+
 	if (!out.good())
 	{
 		throw std::runtime_error(
@@ -686,9 +716,9 @@ bool TriangleMesh::write_msh2(const std::string& filename)
 		<< "2.2 0 8"          << "\n"
 		<< "$EndMeshFormat"   << "\n"
 		<< "$Nodes"           << "\n" 
-		<< in.numberofpoints << "\n";
+		<< in.numberofpoints  << "\n";
 	
-	//Read arrays from .node file
+	//write arrays from .node file
 	for (unsigned int i = 0; 
 					  i < static_cast<unsigned int>(in.numberofpoints); 
 					  ++i
@@ -786,13 +816,13 @@ bool TriangleMesh::write_nodes(const std::string& nodefilename)
 			outfile << in.pointlist[i * 2 + j] << "   ";
 		}
 		
-		// Vertex attributes
+		// point attributes
 		if (in.numberofpointattributes != 0)
 		{
 			outfile << in.pointattributelist[i] << "   ";
 		}
 		
-		// Vertex markers
+		// point markers
 		if (in.pointmarkerlist != 0)
 		{
 			outfile << in.pointmarkerlist[i];

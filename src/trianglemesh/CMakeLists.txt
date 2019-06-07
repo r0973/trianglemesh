@@ -10,7 +10,6 @@ include_directories(${PROJECT_SOURCE_DIR})
 set(
 	TRIANGLEMESH_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/trianglemesh.h
-	#${CMAKE_CURRENT_SOURCE_DIR}/detail/trianglemesh.cpp
 )
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -34,8 +33,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DTRIANGLEMESH_EXPORTS")
 
 message(STATUS "cmake_cxx_flags: " ${CMAKE_CXX_FLAGS})
 
-#add_subdirectory(triangle)
-
 set(TARGET_LIB_NAME ${PROJECT_NAME})
 
 add_library(
@@ -56,5 +53,3 @@ target_include_directories(
 	PUBLIC 
     ${PROJECT_SOURCE_DIR}
 )
-
-#add_subdirectory(test)

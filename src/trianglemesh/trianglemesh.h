@@ -32,15 +32,6 @@ namespace trianglemesh
 
 extern "C" {
 
-//#ifndef REAL
-//#define REAL double
-//#endif
-//
-//#ifndef	ANSI_DECLARATORS
-//#define	ANSI_DECLARATORS
-//#endif
-//#define VOID int
-
 #include <triangle/triangle.h>
 
 }
@@ -76,7 +67,7 @@ public:
     }
 
 public:
-	bool read_poly(const std::string& filename);
+	bool read_poly(const std::string& filename) noexcept(false);
 	bool read_poly(std::stringstream& PolyFile);
 	bool read_mesh(const std::string& filename);
 
@@ -86,15 +77,15 @@ public:
 		const std::string& delimiter, 
 		const std::string& polyfilename, 
 		const std::string& triswitches
-	);
+	) noexcept(false);
 
 	bool build_mesh(
 		const std::string& switches, 
 		std::stringstream& poly_file
-	);
+	) noexcept(false);
 
 public:
-    bool refine_mesh(const std::string& triswitches);
+    bool refine_mesh(const std::string& triswitches) noexcept(false);
 	bool write_msh2(const std::string& file);
 
 public:
@@ -133,9 +124,9 @@ public:
 	};
 	
 protected:
-    void init(triangulateio& t);
-    void destroy(triangulateio& t, IO_Type);
-    bool replace(triangulateio& in, triangulateio& out);
+    void init(triangulateio& t) noexcept(true);
+    void destroy(triangulateio& t, IO_Type) noexcept(true);
+    bool replace(triangulateio& in, triangulateio& out) noexcept(false);
 
 protected:    
     bool read_nodes(const std::string& filename);
