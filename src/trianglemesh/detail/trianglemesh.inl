@@ -856,7 +856,7 @@ bool TriangleMesh::write_edges(const std::string& edgefilename)
 		return false;
 	}
 
-	// Number of edges, number of boundary markers (zero or one)
+	//number of edges, number of boundary markers (zero or one)
 	outfile << in.numberofedges << " " 
 			<< ((in.edgemarkerlist != 0) ? "1" : "0") 
 			<< "\n";
@@ -894,7 +894,7 @@ bool TriangleMesh::write_elems(const std::string& elementsfilename)
 		throw std::runtime_error(str + " cannot be opened for writing!");
 	}
 
-	/* Number of triangles, vertices per triangle, attributes per triangle. */
+	//number of triangles, vertices per triangle, attributes per triangle
 	outfile << in.numberoftriangles << " " 
 			<< in.numberofcorners   << " " 
 			<< ((in.numberoftriangleattributes != 0) ? "1" : "0") 
