@@ -33,4 +33,9 @@
 
 *.swp
 *.zip
+
+*.msh
+
+# folders
 /build
+.vscode
