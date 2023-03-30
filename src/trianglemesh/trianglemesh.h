@@ -45,7 +45,7 @@ protected:
 		TBOTH = 2
 	};
 
-public:
+protected:
     triangulateio in;
     triangulateio out;
     triangulateio vorout;
@@ -68,7 +68,11 @@ public:
 
 public:
 	bool read_poly(const std::string& filename) noexcept(false);
+
+protected:
 	bool read_poly(std::stringstream& PolyFile);
+
+public:
 	bool read_mesh(const std::string& filename);
 
 public:

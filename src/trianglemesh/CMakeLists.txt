@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.11)
 
-project(trianglemesh)
+project(trianglemesh LANGUAGES CXX)
 
 message(STATUS "triaglemesh: cmake_project_source_dir: " ${PROJECT_SOURCE_DIR})
 message(STATUS "trinaglemesh: cmake_current_source_dir: " ${CMAKE_CURRENT_SOURCE_DIR})

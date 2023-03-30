@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.11)
 
-project(test)
+project(test LANGUAGES CXX)
 
 set(
 	TEST_SOURCES

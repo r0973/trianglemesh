@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.11)
 
-project(triangle)
+project(triangle LANGUAGES C)
 
 set(
 	TRIANGLE_SOURCES
