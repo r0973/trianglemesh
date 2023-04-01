@@ -70,7 +70,7 @@ public:
 	bool read_poly(const std::string& filename) noexcept(false);
 
 protected:
-	bool read_poly(std::stringstream& PolyFile);
+	bool read_poly(std::stringstream& PolyFile) noexcept(false);
 
 public:
 	bool read_mesh(const std::string& filename);
@@ -90,12 +90,12 @@ public:
 
 public:
     bool refine_mesh(const std::string& triswitches) noexcept(false);
-	bool write_msh2(const std::string& file);
+	bool write_msh2(const std::string& file) noexcept(false);
 
 public:
-	bool write_nodes(const std::string& nodefilename);
-	bool write_edges(const std::string& edgefilename);
-	bool write_elems(const std::string& elementsfilename);
+	bool write_nodes(const std::string& nodefilename) noexcept(false);
+	bool write_edges(const std::string& edgefilename) noexcept(false);
+	bool write_elems(const std::string& elementsfilename) noexcept(false);
 
 public:
     template<typename json_type>
@@ -106,6 +106,9 @@ public:
 	
 	template<typename json_type>
 	json_type write_elems();
+
+	template<typename json_type>
+	json_type write_mesh(); 
 
 public:
 	bool write_msh2 (std::stringstream& outfile);

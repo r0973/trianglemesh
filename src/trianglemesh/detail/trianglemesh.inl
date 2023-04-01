@@ -712,17 +712,18 @@ bool TriangleMesh::write_msh2(const std::string& filename)
 	out.setf(std::ios::scientific);
 	out.precision(16);
 
+	//write header
 	out << "$MeshFormat"      << "\n"
 		<< "2.2 0 8"          << "\n"
-		<< "$EndMeshFormat"   << "\n"
-		<< "$Nodes"           << "\n" 
+		<< "$EndMeshFormat"   << "\n";
+
+	//write nodes
+	out	<< "$Nodes"           << "\n" 
 		<< in.numberofpoints  << "\n";
 	
-	//write arrays from .node file
 	for (unsigned int i = 0; 
 					  i < static_cast<unsigned int>(in.numberofpoints); 
-					  ++i
-		)
+					  ++i)
 	{
 		out << i + 1 << " ";
 	
@@ -735,12 +736,15 @@ bool TriangleMesh::write_msh2(const std::string& filename)
 		out << 0 << "\n";
 	};
 	
+	out << "$EndNodes"    << "\n"; 	
+	
+	
+	//write elements
 	const unsigned int n_all_elements = //in.numberofpoints    +
 										//in.numberofsegments  +
 										in.numberoftriangles;
-	
-	out << "$EndNodes"    << "\n" 
-		<< "$Elements"    << "\n" 
+
+	out	<< "$Elements"    << "\n" 
 		<< n_all_elements << "\n";
 
 	unsigned int serial_number = 0;
@@ -1331,6 +1335,23 @@ bool TriangleMesh::write_elems(std::stringstream& outfile)
 	return true;
 }
 
+template<typename json_type>
+json_type TriangleMesh::write_mesh() 
+{
+	json_type json;
+
+	auto jnodes = write_nodes<json_type>();
+	auto jedges = write_edges<json_type>();
+	auto jelems = write_elems<json_type>();
+
+	return {
+		{"nodes", jnodes},
+		{"edges", jedges},
+		{"elems", jelems}
+	};
+	
+}
+
 
 template<typename json_type>
 json_type TriangleMesh::write_nodes()
@@ -1376,7 +1397,7 @@ json_type TriangleMesh::write_nodes()
 		);
 	}
 
-	return std::forward<json_type>(json);
+	return json;
 };
 
 
@@ -1400,7 +1421,7 @@ json_type TriangleMesh::write_edges()
 		);
 	}
 
-	return std::forward<json_type>(json);
+	return json;
 }
 
 
@@ -1424,7 +1445,7 @@ json_type TriangleMesh::write_elems()
 		);
 	}
 
-	return std::forward<json_type>(json);
+	return json;
 }
 
 
